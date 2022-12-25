@@ -1,2 +1,2 @@
 @chcp 65001
-call vrunner vanessa %*
+call vrunner xunit build/tests/testRikiPeg.epf %*
