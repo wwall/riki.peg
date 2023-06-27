@@ -1,11 +1,36 @@
-﻿
+﻿var parserStorage;
 var cnst;
 var id;
+var stream;
+var stack;
+var dataReader;
+
+
+
 
 function id()
 	id = id + 1;
 	return id;
 endfunction
+
+#region stack
+
+procedure push(value)
+	stack.add(value);
+endprocedure
+
+function top()
+	return stack[stack.UBound()];
+endfunction
+
+function pop()
+	value = stack[stack.UBound()];
+	stack.delete(stack.UBound());
+	return value;
+endfunction
+	
+#endregion
+
 
 #region collection
 
@@ -108,20 +133,22 @@ endfunction
 
 #endregion
 
-#region inner
+#region declare
 
 function matchiChar(char) export
-	return alt(matchRange(upper(char), upper(char)),matchRange(lower(char), lower(char)));
+	
+	set = new Array;
+	set.Add(upper(char));
+	set.Add(lower(char));
+	return new Structure("type, set", cnst.range, set);
+	
 endfunction
 
 function matchChar(char) export
-	return matchRange(char, char);
+	set = new Array;
+	set.Add(char);
+	return new Structure("type, set", cnst.range, set);
 endfunction
-
-function matchCode(charCode) export
-	return matchRange(char(charCode), char(charCode));
-endfunction
-
 
 function matchString(string) export
 	
@@ -144,7 +171,11 @@ function matchiString(string) export
 endfunction
 
 function matchRange(fromChar, toChar) export
-	return new Structure("type, fromChar, toChar", cnst.range, fromChar, toChar);
+	set = new Array;
+	for value = CharCode(fromChar) to CharCode(toChar) do
+		set.Add(Char(value));
+	enddo;
+	return new Structure("type,  set", cnst.range, set);
 endfunction
 
 function seq(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, arg10= Undefined, arg11= Undefined, arg12 = Undefined, arg13= Undefined, arg14= Undefined, arg15= Undefined, arg16= Undefined, arg17= Undefined, arg18= Undefined, arg19= Undefined, arg20= Undefined, arg21= Undefined, arg22 = Undefined, arg23= Undefined, arg24= Undefined, arg25= Undefined, arg26= Undefined, arg27= Undefined, arg28= Undefined, arg29= Undefined  ) export
@@ -216,18 +247,142 @@ function fn(parser, code) export
 	
 endfunction
 
+
+function addParser(name,parser) export
+	parserStorage.insert(name,parser);
+endfunction
+
 #endregion
+
+#region stream
+
+function initStream_string(string)
+	stream = undefined;
+	dataReader = undefined;
+	stream = new MemoryStream;
+	writer = new DataWriter(stream);
+	writer.WriteLine(string);
+	stream.seek(0,PositionInStream.Begin);
+	return new Structure("pos, line, column", 0, 1, 1);
+	
+endfunction
+
+
+#endregion
+
+function readChar(state)
+	
+	if dataReader = undefined then
+		dataReader = new DataReader(stream);
+	endif;
+	
+	return dataReader.ReadChars(1);
+	
+endfunction
+
+function updateLineColumn_inc(state, char)
+	state.pos = state.pos + 1;
+	
+	if char = chars.CR then
+		state.line = state.line + 1;
+		state.column = 1;
+	else
+		state.column = state.column + 1;
+	endif;
+	
+endfunction
+
+function succes(state, result)
+	
+	return new Structure("succes, state, result", true, state, result);
+	
+endfunction
+
+function failure()
+	localstate = pop();
+	offset =  localstate.pos - stream.CurrentPosition();
+	if offset <> 0 then
+		stream.seek(offset,PositionInStream.Current);
+	endif;
+	dataReader = undefined;
+	return new Structure("succes, state", false, localstate);
+	
+endfunction
+
+
+function apply_range(parser, state)
+	push(state);
+	char = readChar(state);
+	if parser.set.Find(char) = Undefined then
+		return failure();
+	endif;
+	pop();
+	updateLineColumn_inc(state, char);
+	return succes(state, char);
+	
+endfunction
+
+
+
+function apply_alt(parser, state)
+	
+	for each parser in parser.args do
+		push(state);
+		result = applyParser(parser,state);
+		if result.succes then
+			pop();
+			return result;
+		endif;
+	enddo;
+	
+	return failure();	
+	
+endfunction
+
+
+
+function applyParser(parser, state)
+	if typeOf(parser) = Type("string") then
+		localParser = parserStorage[parser];
+	else 
+		localParser = parser;
+	endif;
+	
+	if localParser.type = cnst.range then
+		result = apply_range(localParser, state)
+	elsif localParser.type = cnst.alt then
+		result = apply_alt(localParser, state)
+	else
+		raise "Unknown type";
+	endif;
+	
+	return result;
+	
+endfunction
+
+
+function apply(string, name) export
+	state = initStream_string(string);
+	stack = new Array;
+	return applyParser(name, state);
+endfunction
+
+
 
 procedure init()
 	id = 0;
 	cnst = intoStructure("inf",-1,
 	"range", id(), 
-	"seq", id(), 
 	"alt", id(), 
+	"seq", id(), 
 	"repeat", id(), 
 	"fn", id(), 
 	"positive", id(), 
 	"not", id());
+	
+	parserStorage = new Structure;
+	
 endprocedure
 
 init();
+
