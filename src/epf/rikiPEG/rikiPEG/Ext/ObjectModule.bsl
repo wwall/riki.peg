@@ -220,13 +220,13 @@ endfunction
 
 function neg(parser) export
 	
-	return new Structure("type, args", cnst.not, parser);
+	return new Structure("type, parser", cnst.negative, parser);
 	
 endfunction
 
 function positive(parser) export
 	
-	return new Structure("type, args", cnst.positive, parser);
+	return new Structure("type, parser", cnst.positive, parser);
 	
 endfunction
 
@@ -262,6 +262,11 @@ function fn(parser, code) export
 	
 endfunction
 
+function bind(name,parser) export
+	
+	return new Structure("type, parser, name", cnst.bind, parser, name);
+	
+endfunction
 
 function addParser(name,parser) export
 	parserStorage.insert(name,parser);
@@ -293,7 +298,7 @@ function readChar(state)
 endfunction
 
 function updateLineColumn_inc(state, char)
-	state.pos = state.pos + 1;
+	state.pos = stream.CurrentPosition();
 	
 	if char = chars.CR then
 		state.line = state.line + 1;
@@ -308,7 +313,7 @@ endfunction
 
 #region stream
 
-function apply_range(parser, state)
+function apply_range(parser, state, context)
 	push(state);
 	char = readChar(state);
 	if parser.set.Find(char) = Undefined then
@@ -320,11 +325,11 @@ function apply_range(parser, state)
 	
 endfunction
 
-function apply_alt(parser, state)
+function apply_alt(parser, state, context)
 	
 	for each arg in parser.args do
 		push(state);
-		result = apply_parser(arg,state);
+		result = apply_parser(arg, state, context);
 		if result.succes then
 			pop();
 			return result;
@@ -335,11 +340,11 @@ function apply_alt(parser, state)
 	
 endfunction
 
-function apply_seq(parser, state)
+function apply_seq(parser, state, context)
 	push(state);
 	seqResult = new Array;
 	for each arg in parser.args do
-		result = apply_parser(arg,state);
+		result = apply_parser(arg, state, context);
 		if not result.succes then
 			return failure();	
 		endif;
@@ -349,11 +354,11 @@ function apply_seq(parser, state)
 	return succes(state,seqResult);
 endfunction
 
-function apply_star(parser, state)
+function apply_star(parser, state, context)
 	seqResult = new Array;
 	while true do
 		push(state);
-		result = apply_parser(parser.parser,state);
+		result = apply_parser(parser.parser, state, context);
 		if result.succes then
 			pop();
 			seqResult.add(result.result);
@@ -364,17 +369,17 @@ function apply_star(parser, state)
 	enddo;
 endfunction
 
-function apply_plus(parser, state)
+function apply_plus(parser, state, context)
 	push(state);
 	seqResult = new Array;
-	result = apply_parser(parser.parser,state);
+	result = apply_parser(parser.parser, state, context);
 	if not result.succes then
 		return failure();	
 	endif;
 	seqResult.add(result.result);
 	while true do
 		push(state);
-		result = apply_parser(parser.parser,state);
+		result = apply_parser(parser.parser, state, context);
 		if result.succes then
 			seqResult.add(result.result);
 		else			
@@ -384,9 +389,9 @@ function apply_plus(parser, state)
 	enddo;
 endfunction
 
-function apply_quest(parser, state)
+function apply_quest(parser, state, context)
 	push(state);
-	result = apply_parser(parser.parser,state);
+	result = apply_parser(parser.parser, state, context);
 	pop();
 	if result.succes then
 		result = result.result;
@@ -397,7 +402,64 @@ function apply_quest(parser, state)
 endfunction
 
 
-function apply_parser(inParser, state)
+function apply_positive(parser, state, context)
+	push(state);
+	result = apply_parser(parser.parser, state, context);
+	if result.succes then
+		returnState = moveStream();
+		return succes(returnState, undefined);
+	else
+		return failure();
+	endif;
+endfunction
+
+function apply_negative(parser, state, context)
+	push(state);
+	result = apply_parser(parser.parser, state, context);
+	if not result.succes then
+		returnState = moveStream();
+		return succes(returnState, undefined);
+	else
+		return failure();
+	endif;
+endfunction
+
+function apply_fn(parser, state, context)
+	push(state);
+	newcontext = new map;
+	result = apply_parser(parser.parser,state, newcontext);
+	if not result.succes then
+		return failure();
+	endif;
+	result = result.result;
+	codeArray = new array;
+	for each x in newcontext do
+		codeArray.Add(StrTemplate("%1 = newcontext[""%1""];", x.Key));
+	enddo;
+	
+	codeArray.Add(parser.code);
+	runCode = StrConcat(codeArray, "; ");
+	try
+		Execute runCode;
+	except
+		result = ErrorDescription();
+	endtry;
+	pop();
+	return succes(state,result);
+	
+endfunction
+
+function apply_bind(parser, state, context)
+	push(state);
+	result = apply_parser(parser.parser,state, context);
+	if not result.succes then
+		return failure();
+	endif;
+	context[parser.name] = result.result;
+	return succes(state, undefined);
+endfunction
+
+function apply_parser(inParser, state, context)
 	if typeOf(inParser) = Type("string") then
 		parser = parserStorage[inParser];
 	else 
@@ -405,17 +467,25 @@ function apply_parser(inParser, state)
 	endif;
 	
 	if parser.type = cnst.range then
-		result = apply_range(parser, state)
+		result = apply_range(parser, state, context);
 	elsif parser.type = cnst.alt then
-		result = apply_alt(parser, state)
+		result = apply_alt(parser, state, context);
 	elsif parser.type = cnst.seq then
-		result = apply_seq(parser, state)
+		result = apply_seq(parser, state, context);
 	elsif parser.type = cnst.star then
-		result = apply_star(parser, state)
+		result = apply_star(parser, state, context);
 	elsif parser.type = cnst.plus then
-		result = apply_plus(parser, state)
+		result = apply_plus(parser, state, context);
 	elsif parser.type = cnst.quest then
-		result = apply_quest(parser, state)
+		result = apply_quest(parser, state, context);
+	elsif parser.type = cnst.positive then
+		result = apply_positive(parser, state, context);
+	elsif parser.type = cnst.negative then
+		result = apply_negative(parser, state, context);
+	elsif parser.type = cnst.fn then
+		result = apply_fn(parser, state, context);
+	elsif parser.type = cnst.bind then
+		result = apply_bind(parser, state, context);
 	else
 		raise "Unknown type";
 	endif;
@@ -427,7 +497,7 @@ endfunction
 function apply(string, name) export
 	state = initStream_string(string);
 	stack = new Array;
-	return apply_parser(name, state);
+	return apply_parser(name, state, Undefined);
 endfunction
 
 #endregion
