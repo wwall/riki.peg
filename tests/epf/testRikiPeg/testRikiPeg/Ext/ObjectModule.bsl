@@ -2,7 +2,7 @@
 Перем КонтекстЯдра;
 Перем Ожидаем;
 
-Перем обработка;
+Перем peg;
 
 
 Процедура Инициализация(КонтекстЯдраПараметр) Экспорт
@@ -46,7 +46,7 @@
 	ФайлТеста = Новый Файл(ЭтотОбъект.ИспользуемоеИмяФайла);
 	ФайлОбработки = ФайлТеста.Путь + "..\rikiPEG.epf";
 	
-	Обработка = ВнешниеОбработки.Создать(ФайлОбработки, Ложь);
+	peg = ВнешниеОбработки.Создать(ФайлОбработки, Ложь);
 	
 	
 КонецПроцедуры
@@ -56,7 +56,7 @@
 
 Процедура ТестДолжен_ВыполнитьПроверку() Экспорт
 	
-	Ожидаем.Что(Обработка.testCheck(),"Обработка корректно подключилась").Равно(1);
+	Ожидаем.Что(peg.testCheck(),"Обработка корректно подключилась").Равно(1);
 	
 КонецПроцедуры
 
@@ -67,8 +67,8 @@
 
 Процедура ТестДолжен_ВыполнитьПроверку_char_pos() Экспорт
 	
-	обработка.addParser("test", обработка.matchChar("б"));
-	result = обработка.apply("болт", "test");
+	peg.addParser("test", peg.matchChar("б"));
+	result = peg.apply("болт", "test");
 	Ожидаем.Что(result.result,"Корректно прочли символ").Равно("б");
 	Ожидаем.Что(result.state.column).Равно(2);
 	Ожидаем.Что(result.state.pos).Равно(1);
@@ -81,8 +81,8 @@
 
 Процедура ТестДолжен_ВыполнитьПроверку_char_neg() Экспорт
 	
-	обработка.addParser("test", обработка.matchChar("б"));
-	result = обработка.apply("олт", "test");
+	peg.addParser("test", peg.matchChar("б"));
+	result = peg.apply("олт", "test");
 	Ожидаем.Что(result.state.column).Равно(1);
 	Ожидаем.Что(result.state.pos).Равно(0);
 	Ожидаем.Что(result.state.line).Равно(1);
@@ -93,16 +93,16 @@
 
 Процедура ТестДолжен_ВыполнитьПроверку_ichar_pos() Экспорт
 	
-	обработка.addParser("test", обработка.matchiChar("б"));
-	result = обработка.apply("Болт", "test");
+	peg.addParser("test", peg.matchiChar("б"));
+	result = peg.apply("Болт", "test");
 	Ожидаем.Что(result.result,"Корректно прочли символ").Равно("Б");
 	Ожидаем.Что(result.state.column).Равно(2);
 	Ожидаем.Что(result.state.pos).Равно(1);
 	Ожидаем.Что(result.state.line).Равно(1);
 	Ожидаем.Что(result.succes).Равно(Истина);
 	
-	обработка.addParser("test", обработка.matchiChar("б"));
-	result = обработка.apply("болт", "test");
+	peg.addParser("test", peg.matchiChar("б"));
+	result = peg.apply("болт", "test");
 	Ожидаем.Что(result.result,"Корректно прочли символ").Равно("б");
 	Ожидаем.Что(result.state.column).Равно(2);
 	Ожидаем.Что(result.state.pos).Равно(1);
@@ -113,8 +113,8 @@
 
 Процедура ТестДолжен_ВыполнитьПроверку_ichar_neg() Экспорт
 	
-	обработка.addParser("test", обработка.matchiChar("б"));
-	result = обработка.apply("олт", "test");
+	peg.addParser("test", peg.matchiChar("б"));
+	result = peg.apply("олт", "test");
 	Ожидаем.Что(result.state.column).Равно(1);
 	Ожидаем.Что(result.state.pos).Равно(0);
 	Ожидаем.Что(result.state.line).Равно(1);
@@ -125,8 +125,8 @@
 
 Процедура ТестДолжен_ВыполнитьПроверку_string_pos() Экспорт
 	
-	обработка.addParser("test", обработка.matchString("Болт"));
-	result = обработка.apply("Болтик", "test");
+	peg.addParser("test", peg.matchString("Болт"));
+	result = peg.apply("Болтик", "test");
 	Ожидаем.Что(result.result[0],"Корректно прочли строку").Равно("Б");
 	Ожидаем.Что(result.result[1],"Корректно прочли строку").Равно("о");
 	Ожидаем.Что(result.result[2],"Корректно прочли строку").Равно("л");
@@ -140,8 +140,8 @@
 
 Процедура ТестДолжен_ВыполнитьПроверку_string_neg() Экспорт
 	
-	обработка.addParser("test", обработка.matchString("Болт"));
-	result = обработка.apply("болтик", "test");
+	peg.addParser("test", peg.matchString("Болт"));
+	result = peg.apply("болтик", "test");
 	Ожидаем.Что(result.state.column).Равно(1);
 	Ожидаем.Что(result.state.pos).Равно(0);
 	Ожидаем.Что(result.state.line).Равно(1);
@@ -153,8 +153,8 @@
 
 Процедура ТестДолжен_ВыполнитьПроверку_istring_pos() Экспорт
 	
-	обработка.addParser("test", обработка.matchiString("Болт"));
-	result = обработка.apply("БОЛтик", "test");
+	peg.addParser("test", peg.matchiString("Болт"));
+	result = peg.apply("БОЛтик", "test");
 	Ожидаем.Что(result.result[0],"Корректно прочли строку").Равно("Б");
 	Ожидаем.Что(result.result[1],"Корректно прочли строку").Равно("О");
 	Ожидаем.Что(result.result[2],"Корректно прочли строку").Равно("Л");
@@ -168,12 +168,93 @@
 
 Процедура ТестДолжен_ВыполнитьПроверку_istring_neg() Экспорт
 	
-	обработка.addParser("test", обработка.matchiString("Болт"));
-	result = обработка.apply("ботик", "test");
+	peg.addParser("test", peg.matchiString("Болт"));
+	result = peg.apply("ботик", "test");
 	Ожидаем.Что(result.state.column).Равно(1);
 	Ожидаем.Что(result.state.pos).Равно(0);
 	Ожидаем.Что(result.state.line).Равно(1);
 	Ожидаем.Что(result.succes).Равно(ложь);
 	
 КонецПроцедуры
+
+
+
+Процедура ТестДолжен_ВыполнитьПроверку_12_pos() Экспорт
+	
+	peg.addParser("test", peg.plus(peg.matchChar("А")));
+	result = peg.apply("ААб", "test");
+	Ожидаем.Что(result.result[0],"Корректно прочли строку").Равно("А");
+	Ожидаем.Что(result.result[1],"Корректно прочли строку").Равно("А");
+	Ожидаем.Что(result.state.column).Равно(3);
+	Ожидаем.Что(result.state.pos).Равно(2);
+	Ожидаем.Что(result.state.line).Равно(1);
+	Ожидаем.Что(result.succes).Равно(Истина);
+	
+КонецПроцедуры
+
+Процедура ТестДолжен_ВыполнитьПроверку_12_neg() Экспорт
+	
+	peg.addParser("test", peg.plus(peg.matchChar("А")));
+	result = peg.apply("ботик", "test");
+	Ожидаем.Что(result.state.column).Равно(1);
+	Ожидаем.Что(result.state.pos).Равно(0);
+	Ожидаем.Что(result.state.line).Равно(1);
+	Ожидаем.Что(result.succes).Равно(ложь);
+	
+КонецПроцедуры
+
+
+Процедура ТестДолжен_ВыполнитьПроверку_02_pos() Экспорт
+	
+	peg.addParser("test", peg.star(peg.matchChar("А")));
+	result = peg.apply("АААБОЛтик", "test");
+	Ожидаем.Что(result.result[0],"Корректно прочли строку").Равно("А");
+	Ожидаем.Что(result.result[1],"Корректно прочли строку").Равно("А");
+	Ожидаем.Что(result.result[2],"Корректно прочли строку").Равно("А");
+	Ожидаем.Что(result.state.column).Равно(4);
+	Ожидаем.Что(result.state.pos).Равно(3);
+	Ожидаем.Что(result.state.line).Равно(1);
+	Ожидаем.Что(result.succes).Равно(Истина);
+	
+КонецПроцедуры
+
+Процедура ТестДолжен_ВыполнитьПроверку_02_neg() Экспорт
+	
+	peg.addParser("test", peg.star(peg.matchChar("А")));
+	result = peg.apply("ботик", "test");
+	Ожидаем.Что(result.result.count()).Равно(0);
+	Ожидаем.Что(result.state.column).Равно(1);
+	Ожидаем.Что(result.state.pos).Равно(0);
+	Ожидаем.Что(result.state.line).Равно(1);
+	Ожидаем.Что(result.succes).Равно(true);
+	
+КонецПроцедуры
+
+
+
+Процедура ТестДолжен_ВыполнитьПроверку_01_pos() Экспорт
+	
+	peg.addParser("test", peg.quest(peg.matchChar("А")));
+	result = peg.apply("АААБОЛтик", "test");
+	Ожидаем.Что(result.result,"Корректно прочли символ").Равно("А");
+	Ожидаем.Что(result.state.column).Равно(2);
+	Ожидаем.Что(result.state.pos).Равно(1);
+	Ожидаем.Что(result.state.line).Равно(1);
+	Ожидаем.Что(result.succes).Равно(Истина);
+
+	
+КонецПроцедуры
+
+Процедура ТестДолжен_ВыполнитьПроверку_01_neg() Экспорт
+	
+	peg.addParser("test", peg.quest(peg.matchChar("А")));
+	result = peg.apply("БОЛтик", "test");
+	Ожидаем.Что(result.result).Равно(Undefined);
+	Ожидаем.Что(result.state.column).Равно(1);
+	Ожидаем.Что(result.state.pos).Равно(0);
+	Ожидаем.Что(result.state.line).Равно(1);
+	Ожидаем.Что(result.succes).Равно(Истина);
+
+КонецПроцедуры
+
 

@@ -21,6 +21,32 @@ function id()
 	return id;
 endfunction
 
+function succes(state, result)
+	
+	return new Structure("succes, state, result", true, state, result);
+	
+endfunction
+
+function failure()
+	localstate = moveStream();
+	dataReader = undefined;
+	return new Structure("succes, state", false, localstate);
+	
+endfunction
+
+Function moveStream()
+	
+	Var localstate, offset;
+	
+	localstate = pop();
+	offset =  localstate.pos - stream.CurrentPosition();
+	if offset <> 0 then
+		stream.seek(offset,PositionInStream.Current);
+	endif;
+	Return localstate;
+
+EndFunction
+
 #region stack
 
 procedure push(value)
@@ -80,8 +106,8 @@ procedure intoStructure(result, keys, start=undefined)
 		pos = start;
 	endif;
 	
-	for each key in StrSplit(keys,",") do 
-		result.insert(key,pos);
+	for each structKey in StrSplit(keys,",") do 
+		result.insert(structKey,pos);
 		pos = pos + 1;
 	enddo;
 		
@@ -256,9 +282,6 @@ function initStream_string(string)
 	
 endfunction
 
-
-#endregion
-
 function readChar(state)
 	
 	if dataReader = undefined then
@@ -281,23 +304,9 @@ function updateLineColumn_inc(state, char)
 	
 endfunction
 
-function succes(state, result)
-	
-	return new Structure("succes, state, result", true, state, result);
-	
-endfunction
+#endregion
 
-function failure()
-	localstate = pop();
-	offset =  localstate.pos - stream.CurrentPosition();
-	if offset <> 0 then
-		stream.seek(offset,PositionInStream.Current);
-	endif;
-	dataReader = undefined;
-	return new Structure("succes, state", false, localstate);
-	
-endfunction
-
+#region stream
 
 function apply_range(parser, state)
 	push(state);
@@ -315,7 +324,7 @@ function apply_alt(parser, state)
 	
 	for each arg in parser.args do
 		push(state);
-		result = applyParser(arg,state);
+		result = apply_parser(arg,state);
 		if result.succes then
 			pop();
 			return result;
@@ -330,7 +339,7 @@ function apply_seq(parser, state)
 	push(state);
 	seqResult = new Array;
 	for each arg in parser.args do
-		result = applyParser(arg,state);
+		result = apply_parser(arg,state);
 		if not result.succes then
 			return failure();	
 		endif;
@@ -340,20 +349,73 @@ function apply_seq(parser, state)
 	return succes(state,seqResult);
 endfunction
 
+function apply_star(parser, state)
+	seqResult = new Array;
+	while true do
+		push(state);
+		result = apply_parser(parser.parser,state);
+		if result.succes then
+			pop();
+			seqResult.add(result.result);
+		else			
+			moveStream();
+			return succes(state,seqResult);
+		endif;
+	enddo;
+endfunction
 
-function applyParser(parser, state)
-	if typeOf(parser) = Type("string") then
-		localParser = parserStorage[parser];
+function apply_plus(parser, state)
+	push(state);
+	seqResult = new Array;
+	result = apply_parser(parser.parser,state);
+	if not result.succes then
+		return failure();	
+	endif;
+	seqResult.add(result.result);
+	while true do
+		push(state);
+		result = apply_parser(parser.parser,state);
+		if result.succes then
+			seqResult.add(result.result);
+		else			
+			pop();
+			return succes(state,seqResult);
+		endif;
+	enddo;
+endfunction
+
+function apply_quest(parser, state)
+	push(state);
+	result = apply_parser(parser.parser,state);
+	pop();
+	if result.succes then
+		result = result.result;
+	else
+		result = parser.default;
+	endif;
+	return succes(state, result);
+endfunction
+
+
+function apply_parser(inParser, state)
+	if typeOf(inParser) = Type("string") then
+		parser = parserStorage[inParser];
 	else 
-		localParser = parser;
+		parser = inParser;
 	endif;
 	
-	if localParser.type = cnst.range then
-		result = apply_range(localParser, state)
-	elsif localParser.type = cnst.alt then
-		result = apply_alt(localParser, state)
-	elsif localParser.type = cnst.seq then
-		result = apply_seq(localParser, state)
+	if parser.type = cnst.range then
+		result = apply_range(parser, state)
+	elsif parser.type = cnst.alt then
+		result = apply_alt(parser, state)
+	elsif parser.type = cnst.seq then
+		result = apply_seq(parser, state)
+	elsif parser.type = cnst.star then
+		result = apply_star(parser, state)
+	elsif parser.type = cnst.plus then
+		result = apply_plus(parser, state)
+	elsif parser.type = cnst.quest then
+		result = apply_quest(parser, state)
 	else
 		raise "Unknown type";
 	endif;
@@ -362,13 +424,13 @@ function applyParser(parser, state)
 	
 endfunction
 
-
 function apply(string, name) export
 	state = initStream_string(string);
 	stack = new Array;
-	return applyParser(name, state);
+	return apply_parser(name, state);
 endfunction
 
+#endregion
 
 
 procedure init()
