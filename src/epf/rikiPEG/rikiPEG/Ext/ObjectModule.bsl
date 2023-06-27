@@ -1,12 +1,20 @@
-﻿var parserStorage;
+﻿#region vars
+var parserStorage;
 var cnst;
 var id;
 var stream;
 var stack;
 var dataReader;
 
+#endregion
 
+#region testCheck
 
+function testCheck() export
+	return 1;
+endfunction
+
+#endregion
 
 function id()
 	id = id + 1;
@@ -16,7 +24,7 @@ endfunction
 #region stack
 
 procedure push(value)
-	stack.add(value);
+	stack.add(new structure("pos,line,column",value.pos, value.line, value.column));
 endprocedure
 
 function top()
@@ -30,7 +38,6 @@ function pop()
 endfunction
 	
 #endregion
-
 
 #region collection
 
@@ -66,21 +73,19 @@ function intoMap(key0, value0, key1=Undefined, value1 = Undefined, key2=Undefine
 	Return result;
 EndFunction
 
-function intoStructure(key0, value0, key1=Undefined, value1 = Undefined, key2=Undefined, value2 = Undefined, key3=Undefined, value3 = Undefined, key4=Undefined, value4 = Undefined, key5=Undefined, value5 = Undefined, key6=Undefined, value6 = Undefined, key7=Undefined, value7 = Undefined, key8=Undefined, value8 = Undefined, key9=Undefined, value9 = Undefined)
-	result = new Structure;
-	addValue(result, key0, value0);
-	addValue(result, key1, value1);
-	addValue(result, key2, value2);
-	addValue(result, key3, value3);
-	addValue(result, key4, value4);
-	addValue(result, key5, value5);
-	addValue(result, key6, value6);
-	addValue(result, key7, value7);
-	addValue(result, key8, value8);
-	addValue(result, key9, value9);
+procedure intoStructure(result, keys, start=undefined)
+	if start = undefined then
+		pos = result.count() + 1;
+	else
+		pos = start;
+	endif;
 	
-	Return result;
-EndFunction
+	for each key in StrSplit(keys,",") do 
+		result.insert(key,pos);
+		pos = pos + 1;
+	enddo;
+		
+endprocedure
 
 function intoArray(
 	arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, 
@@ -125,36 +130,25 @@ endfunction
 
 #endregion
 
-#region testCheck
-
-function testCheck() export
-	return 1;
-endfunction
-
-#endregion
-
 #region declare
 
 function matchiChar(char) export
 	
-	set = new Array;
-	set.Add(upper(char));
-	set.Add(lower(char));
-	return new Structure("type, set", cnst.range, set);
+	return new Structure("type, set", cnst.range, intoArray(upper(char), lower(char)));
 	
 endfunction
 
 function matchChar(char) export
-	set = new Array;
-	set.Add(char);
-	return new Structure("type, set", cnst.range, set);
+	
+	return new Structure("type, set", cnst.range, intoArray(char));
+	
 endfunction
 
 function matchString(string) export
 	
 	array = new array;
-	for each x in StrSplit(string,"") do
-		array.add(matchChar(x));
+	for x = 1 to StrLen(string) do
+		array.add(matchChar(Mid(string, x, 1)));
 	enddo;
 	
 	return seq2(array);
@@ -163,11 +157,12 @@ endfunction
 function matchiString(string) export
 	
 	array = new array;
-	for each x in StrSplit(string,"") do
-		array.add(matchiChar(x));
+	for x = 1 to StrLen(string) do
+		array.add(matchiChar(Mid(string, x, 1)));
 	enddo;
 	
 	return seq2(array);
+
 endfunction
 
 function matchRange(fromChar, toChar) export
@@ -209,7 +204,6 @@ function positive(parser) export
 	
 endfunction
 
-
 function alt(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, arg10= Undefined, arg11= Undefined, arg12 = Undefined, arg13= Undefined, arg14= Undefined, arg15= Undefined, arg16= Undefined, arg17= Undefined, arg18= Undefined, arg19= Undefined, arg20= Undefined, arg21= Undefined, arg22 = Undefined, arg23= Undefined, arg24= Undefined, arg25= Undefined, arg26= Undefined, arg27= Undefined, arg28= Undefined, arg29= Undefined  ) export
 	
 	seqArray = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29 ); 
@@ -217,27 +211,22 @@ function alt(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Und
 	
 endfunction
 
-function repeat(parser,min,max) export
-	
-	return new Structure("type, min, max", cnst.repeat, min, max);
-	
-endfunction
 
 function plus(parser) export
 	
-	return repeat(parser,1,cnst.inf);
+	return new Structure("type, parser", cnst.plus, parser);
 	
 endfunction
 
 function star(parser) export
 	
-	return repeat(parser,0,cnst.inf);
+	return new Structure("type, parser", cnst.star, parser);
 	
 endfunction
 
-function quest(parser) export
+function quest(parser, default = undefined) export
 	
-	return repeat(parser,0,1);
+	return new Structure("type, parser, default", cnst.quest, parser, default);
 	
 endfunction
 
@@ -322,13 +311,11 @@ function apply_range(parser, state)
 	
 endfunction
 
-
-
 function apply_alt(parser, state)
 	
-	for each parser in parser.args do
+	for each arg in parser.args do
 		push(state);
-		result = applyParser(parser,state);
+		result = applyParser(arg,state);
 		if result.succes then
 			pop();
 			return result;
@@ -339,6 +326,19 @@ function apply_alt(parser, state)
 	
 endfunction
 
+function apply_seq(parser, state)
+	push(state);
+	seqResult = new Array;
+	for each arg in parser.args do
+		result = applyParser(arg,state);
+		if not result.succes then
+			return failure();	
+		endif;
+		seqResult.add(result.result);
+	enddo;
+	pop();
+	return succes(state,seqResult);
+endfunction
 
 
 function applyParser(parser, state)
@@ -352,6 +352,8 @@ function applyParser(parser, state)
 		result = apply_range(localParser, state)
 	elsif localParser.type = cnst.alt then
 		result = apply_alt(localParser, state)
+	elsif localParser.type = cnst.seq then
+		result = apply_seq(localParser, state)
 	else
 		raise "Unknown type";
 	endif;
@@ -371,15 +373,9 @@ endfunction
 
 procedure init()
 	id = 0;
-	cnst = intoStructure("inf",-1,
-	"range", id(), 
-	"alt", id(), 
-	"seq", id(), 
-	"repeat", id(), 
-	"fn", id(), 
-	"positive", id(), 
-	"not", id());
-	
+	cnst = new Structure;
+	intoStructure(cnst,"inf",-1);
+	intoStructure(cnst,"range, alt, seq, plus, star, quest, fn, positive, negative, bind");
 	parserStorage = new Structure;
 	
 endprocedure
