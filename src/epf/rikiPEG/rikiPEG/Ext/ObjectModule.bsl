@@ -238,6 +238,13 @@ function alt(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Und
 endfunction
 
 
+function ref(parser) export
+	
+	return new Structure("type, ref", cnst.ref, parser);
+	
+endfunction
+
+
 function plus(parser) export
 	
 	return new Structure("type, parser", cnst.plus, parser);
@@ -383,7 +390,7 @@ function apply_plus(parser, state, context)
 		if result.succes then
 			seqResult.add(result.result);
 		else			
-			pop();
+			moveStream();
 			return succes(state,seqResult);
 		endif;
 	enddo;
@@ -486,6 +493,8 @@ function apply_parser(inParser, state, context)
 		result = apply_fn(parser, state, context);
 	elsif parser.type = cnst.bind then
 		result = apply_bind(parser, state, context);
+	elsif parser.type = cnst.ref then
+		result = apply_parser(parser.ref, state, context);
 	else
 		raise "Unknown type";
 	endif;
@@ -507,7 +516,7 @@ procedure init()
 	id = 0;
 	cnst = new Structure;
 	intoStructure(cnst,"inf",-1);
-	intoStructure(cnst,"range, alt, seq, plus, star, quest, fn, positive, negative, bind");
+	intoStructure(cnst,"range, alt, seq, plus, star, quest, fn, positive, negative, bind, ref");
 	parserStorage = new Structure;
 	
 endprocedure
