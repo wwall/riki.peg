@@ -10,10 +10,11 @@
 
 Процедура ЗаполнитьНаборТестов(НаборТестов, КонтекстЯдраПараметр) Экспорт
 	КонтекстЯдра = КонтекстЯдраПараметр;
-	НаборТестов.НачатьГруппу("Проверка парсера");
+	НаборТестов.НачатьГруппу("Проверка парсера (числа)");
 	НаборТестов.Добавить("Ситуация1");
 	НаборТестов.Добавить("Ситуация2");
 	НаборТестов.Добавить("Ситуация3");
+	НаборТестов.Добавить("Ситуация4");
 	
 	
 КонецПроцедуры
@@ -26,7 +27,6 @@
 Процедура ПослеЗапускаТеста() Экспорт
 КонецПроцедуры
 
-
 Процедура Ситуация1() Экспорт
 	
 	result = parseTextFromString_1("{1, 2}");
@@ -36,7 +36,6 @@
 	Ожидаем.Что(result.result[1].value).Равно(2);
 	
 КонецПроцедуры
-
 
 Процедура Ситуация2() Экспорт
 	
@@ -52,16 +51,29 @@
 	
 КонецПроцедуры
 
-
 Процедура Ситуация3() Экспорт
 	
-	result = parseTextFromString_1("{1.1, .2, 3.,  4}");
+	result = parseTextFromString_3("{1.1,2.,.3 , 4}");
 	Ожидаем.Что(result.result[0].type).Равно("number");
 	Ожидаем.Что(result.result[0].value).Равно(1.1);
 	Ожидаем.Что(result.result[1].type).Равно("number");
-	Ожидаем.Что(result.result[1].value).Равно(0.2);
+	Ожидаем.Что(result.result[1].value).Равно(2);
 	Ожидаем.Что(result.result[2].type).Равно("number");
-	Ожидаем.Что(result.result[2].value).Равно(3);
+	Ожидаем.Что(result.result[2].value).Равно(0.3);
+	Ожидаем.Что(result.result[3].type).Равно("number");
+	Ожидаем.Что(result.result[3].value).Равно(4);
+	
+КонецПроцедуры
+
+Процедура Ситуация4() Экспорт
+	
+	result = parseTextFromString_3("{1,2,, 4}");
+	Ожидаем.Что(result.result[0].type).Равно("number");
+	Ожидаем.Что(result.result[0].value).Равно(1);
+	Ожидаем.Что(result.result[1].type).Равно("number");
+	Ожидаем.Что(result.result[1].value).Равно(2);
+	Ожидаем.Что(result.result[2].type).Равно("undefined");
+	Ожидаем.Что(result.result[2].value).Равно(undefined);
 	Ожидаем.Что(result.result[3].type).Равно("number");
 	Ожидаем.Что(result.result[3].value).Равно(4);
 	
@@ -79,7 +91,6 @@ function CreatePEG()
 	
 endfunction
 
-
 #region grammars
 
 #region case1
@@ -87,8 +98,6 @@ endfunction
 function parseTextFromString_1(inputString) export
 	
 	peg = CreatePEG();
-	value.Rows.Clear();
-	value.Columns.Clear();
 	grammar_1(peg);
 	return peg.apply(inputString, "list");
 	
@@ -160,8 +169,6 @@ endprocedure
 function parseTextFromString_2(inputString) export
 	
 	peg = CreatePEG();
-	value.Rows.Clear();
-	value.Columns.Clear();
 	grammar_2(peg);
 	return peg.apply(inputString, "list");
 	
@@ -231,8 +238,6 @@ endprocedure
 function parseTextFromString_3(inputString) export
 	
 	peg = CreatePEG();
-	value.Rows.Clear();
-	value.Columns.Clear();
 	grammar_3(peg);
 	return peg.apply(inputString, "list");
 	
@@ -246,8 +251,8 @@ procedure grammar_3(peg)
 	// rest = (\, a:elements)?   {result = a;}
 	//Element = Number / list
 	//Number = digits \. digits
-	//		| 	digits \.
 	//		| 	 \. digits
+	//		| 	digits \.
 	//		| digits
 	
 	//digits = a:([0-9]+)   {result = number(strConcat(a))}
@@ -295,15 +300,20 @@ procedure grammar_3(peg)
 			peg.ref("dot"),
 			peg.bind("b",peg.ref("DIGITS"))),
 			"result = new Structure(""type,value"",""number"",number(a+"".""+b));"));
-	peg.addParser("number02", peg.seq(
+	peg.addParser("number02", 
 		peg.fn(
-			peg.bind("a",peg.ref("DIGITS")),"result = new Structure(""type,value"",""number"",number(a));"),
-			peg.ref("dot")));
-	peg.addParser("number03", peg.seq(
-		peg.ref("dot"),
-		peg.fn(
-			peg.bind("a",peg.ref("DIGITS")),
-			"result = new Structure(""type,value"",""number"",number(a/10));")));
+			peg.seq(
+				peg.bind("a",peg.ref("DIGITS")),
+				peg.ref("dot")),
+		"result = new Structure(""type,value"",""number"",number(a));"));
+			
+			
+	peg.addParser("number03", peg.fn(
+		peg.seq(
+			peg.ref("dot"),
+			peg.bind("a",peg.ref("DIGITS"))),
+		"result = new Structure(""type,value"",""number"",number(a/10));"));
+			
 	peg.addParser("number04", 
 		peg.fn(
 			peg.bind("a",peg.ref("DIGITS")),
@@ -314,11 +324,112 @@ procedure grammar_3(peg)
 			peg.plus(peg.ref("DIGIT")),
 			"result = strConcat(result)"));
 	peg.addParser("DIGIT",peg.matchRange("0","9"));
-	peg.addParser("OPEN",peg.seq(peg.ref("ws"),peg.matchChar("{"),peg.ref("ws")));
-	peg.addParser("CLOSE",peg.seq(peg.ref("ws"),peg.matchChar("}"),peg.ref("ws")));
-	peg.addParser("COMMA",peg.seq(peg.ref("ws"),peg.matchChar(","),peg.ref("ws")));
-	peg.addParser("dot",peg.matchChar(","));
-	peg.addParser("ws",peg.start(peg.alt(peg.matchChar(" "), peg.matchChar(Chars.Tab), peg.matchChar(Chars.CR), peg.matchChar(Chars.LF))));
+	peg.addParser("OPEN", peg.seq(peg.ref("ws"), peg.matchChar("{"), peg.ref("ws")));
+	peg.addParser("CLOSE", peg.seq(peg.ref("ws"), peg.matchChar("}"), peg.ref("ws")));
+	peg.addParser("COMMA", peg.seq(peg.ref("ws"), peg.matchChar(","), peg.ref("ws")));
+	peg.addParser("dot", peg.matchChar("."));
+	peg.addParser("ws",peg.star(peg.altRange(peg.matchChar(" "), peg.matchChar(Chars.Tab), peg.matchChar(Chars.CR), peg.matchChar(Chars.LF))));
+	
+endprocedure
+
+#endregion
+
+#region case4
+
+function parseTextFromString_4(inputString) export
+	
+	peg = CreatePEG();
+	grammar_4(peg);
+	return peg.apply(inputString, "list");
+	
+EndFunction
+
+/// Грамматика разбирает строки из второго случая и дополнительно пониамет десятичную запись числа
+procedure grammar_4(peg)
+	// grammar for file
+	// list = \{ a:elements \} {result = a;}
+	// elements = a:Element b:rest { result = new array; result.add(a); for each x in b do result.add(x); enddo;}
+	// rest = (\, a:elements)?   {result = a;}
+	//Element = Number / list
+	//Number = digits \. digits
+	//		| 	 \. digits
+	//		| 	digits \.
+	//		| digits
+	
+	//digits = a:([0-9]+)   {result = number(strConcat(a))}
+	
+	peg.addParser("list",
+		peg.fn(
+			peg.seq(
+				peg.ref("OPEN"),
+				peg.bind("a",peg.ref("elements")),
+				peg.ref("CLOSE")),
+			"result = a;"));
+			
+	peg.addParser("elements",
+		peg.fn(
+			peg.seq(
+				peg.bind("a", peg.ref("element")),
+				peg.bind("b", peg.ref("rest"))),
+		"result = new array; 
+		|result.add(a); 
+		|for each x in b do 
+		|result.add(x); 
+		|enddo;"));
+	peg.addParser("rest",
+		peg.quest(
+			peg.fn(
+				peg.seq(
+					peg.ref("comma"),
+					peg.bind("a",peg.ref("elements"))),
+				"result = a;"), 
+			new Array));
+				
+	peg.addParser("element", peg.alt(
+		peg.ref("number"),
+		peg.ref("list")));
+		
+	peg.addParser("number", peg.alt(
+		peg.ref("number01"), 
+		peg.ref("number02"), 
+		peg.ref("number03"), 
+		peg.ref("number04")));
+		
+	peg.addParser("number01", peg.fn(
+		peg.seq(
+			peg.bind("a",peg.ref("DIGITS")),
+			peg.ref("dot"),
+			peg.bind("b",peg.ref("DIGITS"))),
+			"result = new Structure(""type,value"",""number"",number(a+"".""+b));"));
+	peg.addParser("number02", 
+		peg.fn(
+			peg.seq(
+				peg.bind("a",peg.ref("DIGITS")),
+				peg.ref("dot")),
+		"result = new Structure(""type,value"",""number"",number(a));"));
+			
+			
+	peg.addParser("number03", peg.fn(
+		peg.seq(
+			peg.ref("dot"),
+			peg.bind("a",peg.ref("DIGITS"))),
+		"result = new Structure(""type,value"",""number"",number(a/10));"));
+			
+	peg.addParser("number04", 
+		peg.fn(
+			peg.bind("a",peg.ref("DIGITS")),
+			"result = new Structure(""type,value"",""number"",number(a));"));
+			
+	peg.addParser("DIGITS",
+		peg.fn(
+			peg.plus(peg.ref("DIGIT")),
+			"result = strConcat(result)"));
+	peg.addParser("DIGIT",peg.matchRange("0","9"));
+	peg.addParser("OPEN", peg.seq(peg.ref("ws"), peg.matchChar("{"), peg.ref("ws")));
+	peg.addParser("CLOSE", peg.seq(peg.ref("ws"), peg.matchChar("}"), peg.ref("ws")));
+	peg.addParser("COMMA", peg.seq(peg.ref("ws"), peg.matchChar(","), peg.ref("ws")));
+	peg.addParser("dot", peg.matchChar("."));
+	peg.addParser("ws",peg.star(peg.altRange(peg.matchChar(" "), peg.matchChar(Chars.Tab), peg.matchChar(Chars.CR), peg.matchChar(Chars.LF))));
 	
 endprocedure
 

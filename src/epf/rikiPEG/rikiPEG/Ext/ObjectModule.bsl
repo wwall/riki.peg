@@ -191,6 +191,7 @@ function matchiString(string) export
 
 endfunction
 
+
 function matchRange(fromChar, toChar) export
 	set = new Array;
 	for value = CharCode(fromChar) to CharCode(toChar) do
@@ -236,6 +237,26 @@ function alt(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Und
 	return new Structure("type, args", cnst.alt, seqArray);
 	
 endfunction
+
+
+function altRange(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, arg10= Undefined, arg11= Undefined, arg12 = Undefined, arg13= Undefined, arg14= Undefined, arg15= Undefined, arg16= Undefined, arg17= Undefined, arg18= Undefined, arg19= Undefined, arg20= Undefined, arg21= Undefined, arg22 = Undefined, arg23= Undefined, arg24= Undefined, arg25= Undefined, arg26= Undefined, arg27= Undefined, arg28= Undefined, arg29= Undefined  ) export
+	
+	Array = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29 ); 
+	set = new array;
+	for each range in Array do
+		for each e in range.set do
+			if set.find(e) <> undefined then
+				continue;
+			endif;
+			set.add(e);
+		enddo;
+	enddo;
+	
+	return new Structure("type,  set", cnst.range, set);
+	
+endfunction
+
+
 
 
 function ref(parser) export
@@ -300,8 +321,8 @@ function readChar(state)
 		dataReader = new DataReader(stream);
 	endif;
 	
-	return dataReader.ReadChars(1);
-	
+	res = dataReader.ReadChars(1);
+	return res;
 endfunction
 
 function updateLineColumn_inc(state, char)
@@ -334,15 +355,16 @@ endfunction
 
 function apply_alt(parser, state, context)
 	
+	push(state);
 	for each arg in parser.args do
-		push(state);
 		result = apply_parser(arg, state, context);
 		if result.succes then
 			pop();
 			return result;
 		endif;
+		state = moveStream();
+		push(state);
 	enddo;
-	
 	return failure();	
 	
 endfunction
@@ -370,8 +392,7 @@ function apply_star(parser, state, context)
 			pop();
 			seqResult.add(result.result);
 		else			
-			moveStream();
-			return succes(state,seqResult);
+			return succes(moveStream(),seqResult);
 		endif;
 	enddo;
 endfunction
@@ -390,8 +411,7 @@ function apply_plus(parser, state, context)
 		if result.succes then
 			seqResult.add(result.result);
 		else			
-			moveStream();
-			return succes(state,seqResult);
+			return succes(moveStream(),seqResult);
 		endif;
 	enddo;
 endfunction
@@ -443,7 +463,7 @@ function apply_fn(parser, state, context)
 	for each x in newcontext do
 		codeArray.Add(StrTemplate("%1 = newcontext[""%1""];", x.Key));
 	enddo;
-	
+	            
 	codeArray.Add(parser.code);
 	runCode = StrConcat(codeArray, "; ");
 	try
@@ -495,9 +515,10 @@ function apply_parser(inParser, state, context)
 		result = apply_bind(parser, state, context);
 	elsif parser.type = cnst.ref then
 		result = apply_parser(parser.ref, state, context);
-	else
+	else                      
 		raise "Unknown type";
 	endif;
+	
 	
 	return result;
 	
