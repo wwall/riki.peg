@@ -3,9 +3,7 @@ var parserStorage;
 var cnst;
 var id;
 var stream;
-var stack;
 var dataReader;
-
 #endregion
 
 #region testCheck
@@ -27,21 +25,21 @@ function succes(state, result)
 	
 endfunction
 
-function failure()
-	localstate = moveStream();
-	dataReader = undefined;
+function failure(stack)
+	localstate = moveStream(stack);
 	return new Structure("succes, state", false, localstate);
 	
 endfunction
 
-Function moveStream()
+Function moveStream(stack)
 	
 	Var localstate, offset;
 	
-	localstate = pop();
+	localstate = pop(stack);
 	offset =  localstate.pos - stream.CurrentPosition();
 	if offset <> 0 then
 		stream.seek(offset,PositionInStream.Current);
+		dataReader = undefined;
 	endif;
 	Return localstate;
 
@@ -49,15 +47,15 @@ EndFunction
 
 #region stack
 
-procedure push(value)
+procedure push(stack, value)
 	stack.add(new structure("pos,line,column",value.pos, value.line, value.column));
 endprocedure
 
-function top()
+function top(stack)
 	return stack[stack.UBound()];
 endfunction
 
-function pop()
+function pop(stack)
 	value = stack[stack.UBound()];
 	stack.delete(stack.UBound());
 	return value;
@@ -160,13 +158,13 @@ endfunction
 
 function matchiChar(char) export
 	
-	return new Structure("type, set", cnst.range, intoArray(upper(char), lower(char)));
+	return new Structure("type, set, expect", cnst.range, intoArray(upper(char), lower(char)), StrTemplate("[%1%2]",upper(char), lower(char)));
 	
 endfunction
 
 function matchChar(char) export
 	
-	return new Structure("type, set", cnst.range, intoArray(char));
+	return new Structure("type, set, expect", cnst.range, intoArray(char), StrTemplate("%1",char));
 	
 endfunction
 
@@ -177,7 +175,7 @@ function matchString(string) export
 		array.add(matchChar(Mid(string, x, 1)));
 	enddo;
 	
-	return seq2(array);
+	return seq2(array, StrTemplate("""%1""",string));
 endfunction
 
 function matchiString(string) export
@@ -187,7 +185,7 @@ function matchiString(string) export
 		array.add(matchiChar(Mid(string, x, 1)));
 	enddo;
 	
-	return seq2(array);
+	return seq2(array,StrTemplate("i(""%1"")",string));
 
 endfunction
 
@@ -197,50 +195,50 @@ function matchRange(fromChar, toChar) export
 	for value = CharCode(fromChar) to CharCode(toChar) do
 		set.Add(Char(value));
 	enddo;
-	return new Structure("type,  set", cnst.range, set);
+	return new Structure("type,  set, expect", cnst.range, set, StrTemplate("[%1-%2]", fromChar, toChar));
 endfunction
 
 function seq(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, arg10= Undefined, arg11= Undefined, arg12 = Undefined, arg13= Undefined, arg14= Undefined, arg15= Undefined, arg16= Undefined, arg17= Undefined, arg18= Undefined, arg19= Undefined, arg20= Undefined, arg21= Undefined, arg22 = Undefined, arg23= Undefined, arg24= Undefined, arg25= Undefined, arg26= Undefined, arg27= Undefined, arg28= Undefined, arg29= Undefined  ) export
 	
 	seqArray = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29 ); 
-	return new Structure("type, args", cnst.seq, seqArray);
+	return new Structure("type, args, expect", cnst.seq, seqArray, arg0.expect);
 	
 endfunction
 
-function seq2(seqArray) export
+function seq2(seqArray,expect) export
 	
-	return new Structure("type, args", cnst.seq, seqArray);
+	return new Structure("type, args, expect", cnst.seq, seqArray, expect);
 	
 endfunction
 
 function alt2(seqArray) export
 	
-	return new Structure("type, args", cnst.alt, seqArray);
+	return new Structure("type, args, expect", cnst.alt, seqArray, "");
 	
 endfunction
 
 function neg(parser) export
 	
-	return new Structure("type, parser", cnst.negative, parser);
+	return new Structure("type, parser, expect", cnst.negative, parser, "");
 	
 endfunction
 
 function positive(parser) export
 	
-	return new Structure("type, parser", cnst.positive, parser);
+	return new Structure("type, parser, expect", cnst.positive, parser, "");
 	
 endfunction
 
 function alt(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, arg10= Undefined, arg11= Undefined, arg12 = Undefined, arg13= Undefined, arg14= Undefined, arg15= Undefined, arg16= Undefined, arg17= Undefined, arg18= Undefined, arg19= Undefined, arg20= Undefined, arg21= Undefined, arg22 = Undefined, arg23= Undefined, arg24= Undefined, arg25= Undefined, arg26= Undefined, arg27= Undefined, arg28= Undefined, arg29= Undefined  ) export
 	
 	seqArray = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29 ); 
-	return new Structure("type, args", cnst.alt, seqArray);
+	return new Structure("type, args, expect", cnst.alt, seqArray, "");
 	
 endfunction
 
 
 function altRange(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, arg10= Undefined, arg11= Undefined, arg12 = Undefined, arg13= Undefined, arg14= Undefined, arg15= Undefined, arg16= Undefined, arg17= Undefined, arg18= Undefined, arg19= Undefined, arg20= Undefined, arg21= Undefined, arg22 = Undefined, arg23= Undefined, arg24= Undefined, arg25= Undefined, arg26= Undefined, arg27= Undefined, arg28= Undefined, arg29= Undefined  ) export
-	
+	expect = new Array;
 	Array = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29 ); 
 	set = new array;
 	for each range in Array do
@@ -250,9 +248,10 @@ function altRange(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4
 			endif;
 			set.add(e);
 		enddo;
+		expect.Add(range.expect);
 	enddo;
 	
-	return new Structure("type,  set", cnst.range, set);
+	return new Structure("type, set, expect", cnst.range, set, StrConcat(expect, " | "));
 	
 endfunction
 
@@ -261,26 +260,26 @@ endfunction
 
 function ref(parser) export
 	
-	return new Structure("type, ref", cnst.ref, parser);
+	return new Structure("type, ref, expect", cnst.ref, parser, "");
 	
 endfunction
 
 
 function plus(parser) export
 	
-	return new Structure("type, parser", cnst.plus, parser);
+	return new Structure("type, parser, expect", cnst.plus, parser, parser.expect);
 	
 endfunction
 
 function star(parser) export
 	
-	return new Structure("type, parser", cnst.star, parser);
+	return new Structure("type, parser, expect", cnst.star, parser);
 	
 endfunction
 
 function quest(parser, default = undefined) export
 	
-	return new Structure("type, parser, default", cnst.quest, parser, default);
+	return new Structure("type, parser, default, expect", cnst.quest, parser, default);
 	
 endfunction
 
@@ -292,7 +291,7 @@ endfunction
 
 function bind(name,parser) export
 	
-	return new Structure("type, parser, name", cnst.bind, parser, name);
+	return new Structure("type, parser, name, expect", cnst.bind, parser, name, "");
 	
 endfunction
 
@@ -341,85 +340,86 @@ endfunction
 
 #region stream
 
-function apply_range(parser, state, context)
-	push(state);
+function apply_range(stack, parser, state, context)
+	push(stack, state);
 	char = readChar(state);
 	if parser.set.Find(char) = Undefined then
-		return failure();
+		return failure(stack);
 	endif;
-	pop();
+	pop(stack);
 	updateLineColumn_inc(state, char);
 	return succes(state, char);
-	
 endfunction
 
-function apply_alt(parser, state, context)
-	
-	push(state);
+function apply_alt(stack, parser, state, context)
+	push(stack,state);
 	for each arg in parser.args do
-		result = apply_parser(arg, state, context);
+		result = apply_parser(stack, arg, state, context);
 		if result.succes then
-			pop();
+			pop(stack);
 			return result;
 		endif;
-		state = moveStream();
-		push(state);
+		state = moveStream(stack);
+		push(stack,state);
 	enddo;
-	return failure();	
+
+	return failure(stack);	
 	
 endfunction
 
-function apply_seq(parser, state, context)
-	push(state);
+function apply_seq(stack, parser, state, context)
+	push(stack, state);
 	seqResult = new Array;
 	for each arg in parser.args do
-		result = apply_parser(arg, state, context);
+		result = apply_parser(stack, arg, state, context);
 		if not result.succes then
-			return failure();	
+			return failure(stack);	
 		endif;
 		seqResult.add(result.result);
 	enddo;
-	pop();
+	pop(stack);
 	return succes(state,seqResult);
 endfunction
 
-function apply_star(parser, state, context)
+function apply_star(stack, parser, state, context)
 	seqResult = new Array;
 	while true do
-		push(state);
-		result = apply_parser(parser.parser, state, context);
+		push(stack, state);
+		result = apply_parser(stack, parser.parser, state, context);
 		if result.succes then
-			pop();
+			pop(stack);
 			seqResult.add(result.result);
 		else			
-			return succes(moveStream(),seqResult);
+			state = moveStream(stack);
+			return succes(state,seqResult);
 		endif;
 	enddo;
 endfunction
 
-function apply_plus(parser, state, context)
-	push(state);
+function apply_plus(stack, parser, state, context)
+	push(stack, state);
 	seqResult = new Array;
-	result = apply_parser(parser.parser, state, context);
+	result = apply_parser(stack, parser.parser, state, context);
 	if not result.succes then
-		return failure();	
+		return failure(stack);	
 	endif;
 	seqResult.add(result.result);
 	while true do
-		push(state);
-		result = apply_parser(parser.parser, state, context);
+		push(stack, state);
+		result = apply_parser(stack, parser.parser, state, context);
 		if result.succes then
 			seqResult.add(result.result);
 		else			
-			return succes(moveStream(),seqResult);
+			state = moveStream(stack);
+			return succes(state,seqResult);
 		endif;
 	enddo;
 endfunction
 
-function apply_quest(parser, state, context)
-	push(state);
-	result = apply_parser(parser.parser, state, context);
-	pop();
+function apply_quest(stack, parser, state, context)
+	push(stack,state);
+	result = apply_parser(stack, parser.parser, state, context);
+	pop(stack);
 	if result.succes then
 		result = result.result;
 	else
@@ -429,34 +429,35 @@ function apply_quest(parser, state, context)
 endfunction
 
 
-function apply_positive(parser, state, context)
-	push(state);
-	result = apply_parser(parser.parser, state, context);
+function apply_positive(stack, parser, state, context)
+	push(stack, state);
+	result = apply_parser(stack, parser.parser, state, context);
 	if result.succes then
-		returnState = moveStream();
-		return succes(returnState, undefined);
+		state = moveStream(stack);
+		return succes(state, undefined);
 	else
-		return failure();
+		return failure(stack);
 	endif;
 endfunction
 
-function apply_negative(parser, state, context)
-	push(state);
-	result = apply_parser(parser.parser, state, context);
+function apply_negative(stack, parser, state, context)
+	push(stack, state);
+	result = apply_parser(stack, parser.parser, state, context);
 	if not result.succes then
-		returnState = moveStream();
+		returnState = moveStream(stack);
 		return succes(returnState, undefined);
 	else
-		return failure();
+		return failure(stack);
 	endif;
 endfunction
 
-function apply_fn(parser, state, context)
-	push(state);
+function apply_fn(stack, parser, state, context)
+
+	push(stack,state);
 	newcontext = new map;
-	result = apply_parser(parser.parser,state, newcontext);
+	result = apply_parser(stack,parser.parser,state, newcontext);
 	if not result.succes then
-		return failure();
+		return failure(stack);
 	endif;
 	result = result.result;
 	codeArray = new array;
@@ -471,22 +472,23 @@ function apply_fn(parser, state, context)
 	except
 		result = ErrorDescription();
 	endtry;
-	pop();
+	
+	pop(stack);
 	return succes(state,result);
 	
 endfunction
 
-function apply_bind(parser, state, context)
-	push(state);
-	result = apply_parser(parser.parser,state, context);
+function apply_bind(stack, parser, state, context)
+	push(stack, state);
+	result = apply_parser(stack, parser.parser,state, context);
 	if not result.succes then
-		return failure();
+		return failure(stack);
 	endif;
 	context[parser.name] = result.result;
 	return succes(state, undefined);
 endfunction
 
-function apply_parser(inParser, state, context)
+function apply_parser(stack, inParser, state, context)
 	if typeOf(inParser) = Type("string") then
 		parser = parserStorage[inParser];
 	else 
@@ -494,31 +496,30 @@ function apply_parser(inParser, state, context)
 	endif;
 	
 	if parser.type = cnst.range then
-		result = apply_range(parser, state, context);
+		result = apply_range(stack, parser, state, context);
 	elsif parser.type = cnst.alt then
-		result = apply_alt(parser, state, context);
+		result = apply_alt(stack, parser, state, context);
 	elsif parser.type = cnst.seq then
-		result = apply_seq(parser, state, context);
+		result = apply_seq(stack, parser, state, context);
 	elsif parser.type = cnst.star then
-		result = apply_star(parser, state, context);
+		result = apply_star(stack, parser, state, context);
 	elsif parser.type = cnst.plus then
-		result = apply_plus(parser, state, context);
+		result = apply_plus(stack, parser, state, context);
 	elsif parser.type = cnst.quest then
-		result = apply_quest(parser, state, context);
+		result = apply_quest(stack, parser, state, context);
 	elsif parser.type = cnst.positive then
-		result = apply_positive(parser, state, context);
+		result = apply_positive(stack, parser, state, context);
 	elsif parser.type = cnst.negative then
-		result = apply_negative(parser, state, context);
+		result = apply_negative(stack, parser, state, context);
 	elsif parser.type = cnst.fn then
-		result = apply_fn(parser, state, context);
+		result = apply_fn(stack, parser, state, context);
 	elsif parser.type = cnst.bind then
-		result = apply_bind(parser, state, context);
+		result = apply_bind(stack, parser, state, context);
 	elsif parser.type = cnst.ref then
-		result = apply_parser(parser.ref, state, context);
+		result = apply_parser(stack, parser.ref, state, context);
 	else                      
 		raise "Unknown type";
 	endif;
-	
 	
 	return result;
 	
@@ -527,7 +528,8 @@ endfunction
 function apply(string, name) export
 	state = initStream_string(string);
 	stack = new Array;
-	return apply_parser(name, state, Undefined);
+	result = apply_parser(stack, name, state, Undefined);
+	return result;
 endfunction
 
 #endregion
@@ -541,6 +543,7 @@ procedure init()
 	parserStorage = new Structure;
 	
 endprocedure
+
 
 init();
 
