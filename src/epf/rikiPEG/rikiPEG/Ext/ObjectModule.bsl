@@ -1,4 +1,5 @@
 ﻿#region vars
+var settings;
 var parserStorage;
 var cnst;
 var id;
@@ -13,6 +14,24 @@ function testCheck() export
 endfunction
 
 #endregion
+
+/// @src https://helpf.pro/faq8/view/940.html
+function HexToDec(val _Hex)
+	base = 16;
+	_Hex = TrimAll(_Hex);
+	maxDeg = StrLen(_Hex) - 1;
+	result = 0;
+	charCounter = 1;
+	while maxDeg >=0 do
+		_HexСимвол = Mid(_Hex, charCounter, 1);
+		charIndex = Найти("0123456789ABCDEF", _HexСимвол) - 1;
+		result = result + charIndex * pow(base, maxDeg);
+		maxDeg = maxDeg - 1;
+		charCounter = charCounter + 1;
+	enddo;   
+	return result;
+endfunction 
+
 
 function id()
 	id = id + 1;
@@ -168,6 +187,12 @@ function matchChar(char) export
 	
 endfunction
 
+function matchByte(byte) export
+	
+	return new Structure("type, set, expect", cnst.ByteRange, intoArray(?(TypeOf(byte) = type("String"), HexToDec(byte), byte)), StrTemplate("%1", byte));
+	
+endfunction
+
 function matchString(string) export
 	
 	array = new array;
@@ -236,7 +261,6 @@ function alt(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Und
 	
 endfunction
 
-
 function altRange(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, arg10= Undefined, arg11= Undefined, arg12 = Undefined, arg13= Undefined, arg14= Undefined, arg15= Undefined, arg16= Undefined, arg17= Undefined, arg18= Undefined, arg19= Undefined, arg20= Undefined, arg21= Undefined, arg22 = Undefined, arg23= Undefined, arg24= Undefined, arg25= Undefined, arg26= Undefined, arg27= Undefined, arg28= Undefined, arg29= Undefined  ) export
 	expect = new Array;
 	Array = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29 ); 
@@ -255,7 +279,17 @@ function altRange(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4
 	
 endfunction
 
+function any() export
+	
+	return new Structure("type, expect", cnst.any,  "any char (not eof)");
+	
+endfunction
 
+function eof() export
+	
+	return new Structure("type, expect", cnst.eof,  "eof input");
+	
+endfunction
 
 
 function ref(parser) export
@@ -267,7 +301,7 @@ endfunction
 
 function plus(parser) export
 	
-	return new Structure("type, parser, expect", cnst.plus, parser, parser.expect);
+	return new Structure("type, parser, expect", cnst.plus, parser, "");
 	
 endfunction
 
@@ -303,6 +337,29 @@ endfunction
 
 #region stream
 
+
+ 
+function initStream_fileName(fileName)
+	
+	stream = undefined;
+	dataReader = undefined;
+	stream = new FileStream(fileName, FileOpenMode.Open);
+	stream.seek(0,PositionInStream.Begin);
+	
+	if dataReader = undefined then
+		dataReader = new DataReader(stream);
+	endif;
+	
+	res = dataReader.ReadByte();
+	res = dataReader.ReadByte();
+	res = dataReader.ReadByte();
+	
+	state = new Structure("pos, line, column", 3, 1, 1);
+	return state;
+	
+endfunction
+
+ 
 function initStream_string(string)
 	stream = undefined;
 	dataReader = undefined;
@@ -324,6 +381,18 @@ function readChar(state)
 	return res;
 endfunction
 
+function readByte(state)
+	
+	if dataReader = undefined then
+		dataReader = new DataReader(stream);
+	endif;
+	
+	res = dataReader.ReadByte();
+	return res;
+	
+endfunction
+
+
 function updateLineColumn_inc(state, char)
 	state.pos = stream.CurrentPosition();
 	
@@ -341,13 +410,16 @@ endfunction
 #region stream
 
 function apply_range(stack, parser, state, context)
+	debugenter(parser, state, "apply_range");
 	push(stack, state);
 	char = readChar(state);
 	if parser.set.Find(char) = Undefined then
+		debugfailure(parser, state, "apply_range");
 		return failure(stack);
 	endif;
 	pop(stack);
 	updateLineColumn_inc(state, char);
+	debugsucces(parser, state, "apply_range",char);
 	return succes(state, char);
 endfunction
 
@@ -488,12 +560,20 @@ function apply_bind(stack, parser, state, context)
 	return succes(state, undefined);
 endfunction
 
+function apply_any(stack, parser, state, context)
+	char = readChar(state);
+	updateLineColumn_inc(state, char);
+	return succes(state, char);
+endfunction
+
 function apply_parser(stack, inParser, state, context)
 	if typeOf(inParser) = Type("string") then
 		parser = parserStorage[inParser];
 	else 
 		parser = inParser;
 	endif;
+	
+	debugenter(parser, state, "apply_parser");
 	
 	if parser.type = cnst.range then
 		result = apply_range(stack, parser, state, context);
@@ -515,11 +595,15 @@ function apply_parser(stack, inParser, state, context)
 		result = apply_fn(stack, parser, state, context);
 	elsif parser.type = cnst.bind then
 		result = apply_bind(stack, parser, state, context);
+	elsif parser.type = cnst.any then
+		result = apply_any(stack, parser, state, context);
 	elsif parser.type = cnst.ref then
 		result = apply_parser(stack, parser.ref, state, context);
 	else                      
 		raise "Unknown type";
 	endif;
+	state = result.state;
+	debugexit(parser, state, "apply_parser");
 	
 	return result;
 	
@@ -532,14 +616,87 @@ function apply(string, name) export
 	return result;
 endfunction
 
+
+function defaultSettings()
+	
+	result = new Structure;
+	result.Insert("debugFlag", false);
+	result.Insert("debugObject", Undefined);
+	return result;
+	
+endfunction
+
+function applyFromFile(fieName, name, inSettings = undefined) export
+	if inSettings = undefined then
+		settings = defaultSettings();
+	else
+		settings = inSettings;
+	endif;
+	
+	state = initStream_fileName(fieName);
+	stack = new Array;
+	result = apply_parser(stack, name, state, Undefined);
+	return result;
+	
+endfunction
+
+
+
 #endregion
+
+procedure debugenter(parser, state, functionName)
+	
+	if not settings.debugFlag then
+		return;
+	endif;
+	settings.debugObject.debugenter(parser, state, functionName);
+	
+endprocedure
+
+procedure debugexit(parser, state, functionName)
+	
+	if not settings.debugFlag then
+		return;
+	endif;
+	settings.debugObject.debugexit(parser, state, functionName);
+	
+endprocedure
+
+
+procedure debugtext(parser, state, text)
+	
+	if not settings.debugFlag then
+		return;
+	endif;
+	settings.debugObject.debugtext(parser, state, text);
+	
+endprocedure
+
+
+procedure debugsucces(parser, state, functionName, result)
+	
+	if not settings.debugFlag then
+		return;
+	endif;
+	settings.debugObject.debugsucces(parser, state, functionName, result);
+	
+endprocedure
+
+procedure debugfailure(parser, state, functionName)
+	
+	if not settings.debugFlag then
+		return;
+	endif;
+	settings.debugObject.debugfailure(parser, state, functionName);
+	
+endprocedure
 
 
 procedure init()
 	id = 0;
 	cnst = new Structure;
 	intoStructure(cnst,"inf",-1);
-	intoStructure(cnst,"range, alt, seq, plus, star, quest, fn, positive, negative, bind, ref");
+	intoStructure(cnst,"eof, byteRange, range, alt, seq, plus, star, quest, fn, positive, negative, bind, ref, any");
 	parserStorage = new Structure;
 	
 endprocedure

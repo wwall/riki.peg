@@ -15,10 +15,13 @@
 	НаборТестов.Добавить("Ситуация2",, "Ситуация2 {1, {3,4}, 2}");
 	НаборТестов.Добавить("Ситуация3",, "Ситуация3 {1.1,-2.,+.3 , -4}");
 	НаборТестов.Добавить("Ситуация4",, "Ситуация4 {2,, 4,1}");
-	НаборТестов.Добавить("Ситуация5",, "Ситуация5 {-1.1, {2,{3},-4},, 5, {6}, {7,,+0.0, -8},+.9}");
+	НаборТестов.Добавить("Ситуация4_1",, "Ситуация4.1 {-1.1, {2,{3},-4},, 5, {6}, {7,,+0.0, -8},+.9}");
 	НаборТестов.НачатьГруппу("Проверка парсера (добавляем остальные типы)");
-	НаборТестов.Добавить("Ситуация6",, "Ситуация5 {1, ""число""}");
+	НаборТестов.Добавить("Ситуация5",, "Ситуация5 {1, ""чис""""ло""}");
+	НаборТестов.Добавить("Ситуация6",, "Ситуация6 {1, BD584D6E64B90DDE0FD09770B}");
 	
+	НаборТестов.НачатьГруппу("Проверка файлов");
+	НаборТестов.Добавить("Ситуация_МелкийФайл",, "Маленький файл");
 	
 КонецПроцедуры
 
@@ -84,7 +87,7 @@
 	
 КонецПроцедуры
 
-Процедура Ситуация5() Экспорт
+Процедура Ситуация4_1() Экспорт
 	
 	result = parseTextFromString_4("{-1.1, {2
 	|,{3},-4},
@@ -116,15 +119,34 @@
 	
 КонецПроцедуры
 
-Процедура Ситуация6() Экспорт
+Процедура Ситуация5() Экспорт
 	
-	result = parseTextFromString_6("{1, ""число""}");
+	result = parseTextFromString_5("{1, ""чис""""ло""}");
 	Ожидаем.Что(result.result[0].type).Равно("number");
 	Ожидаем.Что(result.result[0].value).Равно(1);
 	Ожидаем.Что(result.result[1].type).Равно("string");
-	Ожидаем.Что(result.result[1].value).Равно("число");
+	Ожидаем.Что(result.result[1].value).Равно("чис""""ло");
 	
 КонецПроцедуры
+
+Процедура Ситуация6() Экспорт
+	
+	result = parseTextFromString_6("{1, BD584D6E64B90DDE0FD09770B}");
+	Ожидаем.Что(result.result[0].type).Равно("number");
+	Ожидаем.Что(result.result[0].value).Равно(1);
+	Ожидаем.Что(result.result[1].type).Равно("binary");
+	Ожидаем.Что(result.result[1].value).Равно("BD584D6E64B90DDE0FD09770B");
+	
+КонецПроцедуры
+
+Процедура Ситуация_МелкийФайл() Экспорт
+	
+	result = parseTextFromFile_simpleFile("..\fixtures\testData_01.txt");
+	Ожидаем.Что(result.succes).ЭтоИстина();
+	
+КонецПроцедуры
+
+
 
 
 #endregion
@@ -510,25 +532,26 @@ endprocedure
 #endregion
 
 
-#region case6
+#region case5
 
-function parseTextFromString_6(inputString) export
+function parseTextFromString_5(inputString) export
 	
 	peg = CreatePEG();
-	grammar_6(peg);
+	grammar_5(peg);
 	return peg.apply(inputString, "list");
 	
 EndFunction
 
 /// Грамматика разбирает строки из 4 случая и дополнительно пониамет строки в кавычках
-procedure grammar_6(peg)
+procedure grammar_5(peg)
 	// grammar for file
 	// list = \{ a:elements \} {result = a;}
 	// elements = a:Element b:rest { result = new array; result.add(a); for each x in b do result.add(x); enddo;}
 	// rest = (\, a:elements)?   {result = a;}
 	//Element = listElement / list
-	//listElement = Number / empty
+	//listElement = Number / string/ empty
 	//empty = &\,
+	//string = \" ((!\"). | \"\")+ \"
 	//Number = digits \. digits
 	//		| 	 \. digits
 	//		| 	digits \.
@@ -570,8 +593,29 @@ procedure grammar_6(peg)
 		
 	peg.addParser("listelement", peg.alt(
 		peg.ref("number"),
+		peg.ref("string"),
 		peg.ref("empty")));
 		
+		
+	peg.addParser("string", peg.fn(
+		peg.seq(
+			peg.matchChar(""""),
+			peg.bind("string",peg.star(peg.ref("char"))),
+			peg.matchChar("""")),
+		"result = new Structure(""type,value"",""string"",strConcat(string))"));
+			
+	peg.addParser("char", peg.alt(
+		peg.fn(
+			peg.seq(
+				peg.neg(peg.matchChar("""")),
+				peg.bind("char",peg.any())),
+			"result = char"),
+		peg.fn(
+			peg.seq(
+				peg.bind("char0",peg.matchChar("""")),
+				peg.bind("char1",peg.matchChar(""""))),
+			"result = char0 + char1")));
+				
 	peg.addParser("empty", peg.fn(
 		peg.positive(peg.matchChar(",")),
 		"result = new Structure(""type,value"",""undefined"",undefined)"));
@@ -627,6 +671,202 @@ procedure grammar_6(peg)
 	peg.addParser("ws",peg.star(peg.altRange(peg.matchChar(" "), peg.matchChar(Chars.Tab), peg.matchChar(Chars.CR), peg.matchChar(Chars.LF))));
 	
 endprocedure
+
+#endregion
+
+#region case6
+
+function parseTextFromString_6(inputString) export
+	
+	peg = CreatePEG();
+	grammar_6(peg);
+	return peg.apply(inputString, "list");
+	
+EndFunction
+
+/// Грамматика разбирает строки из 5 случая и дополнительно пониамет бинарные данные 
+procedure grammar_6(peg)
+	// grammar for file
+	// list = \{ a:elements \} {result = a;}
+	// elements = a:Element b:rest { result = new array; result.add(a); for each x in b do result.add(x); enddo;}
+	// rest = (\, a:elements)?   {result = a;}
+	//Element = listElement / list
+	//listElement = string / binary /  Number  / empty
+	//empty = &\,
+	//string = \" ((!\"). | \"\")+ \"
+	//binary = ([0-9A-F])+
+	//Number = digits \. digits
+	//		| 	 \. digits
+	//		| 	digits \.
+	//		| digits
+	
+	//digits = a:([0-9]+)   {result = number(strConcat(a))}
+	
+	peg.addParser("start",peg.plus(
+			peg.fn(
+				peg.seq(
+					peg.ref("ws"),
+					peg.bind("a",peg.ref("list")),
+					peg.ref("ws"),
+					peg.quest("COMMA")),
+				"result = a;")));
+	
+	
+	peg.addParser("list",
+		peg.fn(
+			peg.seq(
+				peg.ref("OPEN"),
+				peg.bind("a",peg.ref("elements")),
+				peg.ref("CLOSE")),
+			"result = a;"));
+			
+	peg.addParser("elements",
+		peg.fn(
+			peg.seq(
+				peg.bind("a", peg.ref("element")),
+				peg.bind("b", peg.ref("rest"))),
+		"result = new array; 
+		|result.add(a); 
+		|for each x in b do 
+		|result.add(x); 
+		|enddo;"));
+	peg.addParser("rest",
+		peg.quest(
+			peg.fn(
+				peg.seq(
+					peg.ref("comma"),
+					peg.bind("a",peg.ref("elements"))),
+				"result = a;"), 
+			new Array));
+
+					
+	peg.addParser("element", peg.alt(
+		peg.ref("listelement"),
+		peg.ref("list")));
+		
+	peg.addParser("listelement", peg.alt(
+		peg.ref("number"),
+		peg.ref("string"),
+		peg.ref("binary"),
+		peg.ref("empty")));
+		
+		
+	peg.addParser("binary", peg.fn(
+			peg.ref("binaryList"),
+		"result = new Structure(""type,value"",""binary"",strConcat(result))"));
+			
+	peg.addParser("binaryList", peg.plus(
+		peg.altRange(
+			peg.matchRange("0","9"),
+			peg.matchRange("A","F"))));
+			
+	peg.addParser("string", peg.fn(
+		peg.seq(
+			peg.matchChar(""""),
+			peg.bind("string",peg.star(peg.ref("char"))),
+			peg.matchChar("""")),
+		"result = new Structure(""type,value"",""string"",strConcat(string))"));
+			
+	peg.addParser("char", peg.alt(
+		peg.fn(
+			peg.seq(
+				peg.neg(peg.matchChar("""")),
+				peg.bind("char",peg.any())),
+			"result = char"),
+		peg.fn(
+			peg.seq(
+				peg.bind("char0",peg.matchChar("""")),
+				peg.bind("char1",peg.matchChar(""""))),
+			"result = char0 + char1")));
+				
+	peg.addParser("empty", peg.fn(
+		peg.positive(peg.matchChar(",")),
+		"result = new Structure(""type,value"",""undefined"",undefined)"));
+
+	peg.addParser("number", peg.fn(
+		peg.seq(
+			peg.bind("sign",
+				peg.quest(
+					peg.alt(
+						peg.fn(peg.matchChar("-"),"result = -1"),
+						peg.fn(peg.matchChar("+"),"result = 1")),1)),
+			peg.bind("number",peg.alt(
+				peg.ref("number01"), 
+				peg.ref("number02"), 
+				peg.ref("number03"), 
+				peg.ref("number04")))),
+			"result = new Structure(""type,value"",""number"",number * sign);"));	
+		
+	peg.addParser("number01", peg.fn(
+		peg.seq(
+			peg.bind("a",peg.ref("DIGITS")),
+			peg.ref("dot"),
+			peg.bind("b",peg.ref("DIGITS"))),
+			"result = number(a+"".""+b);"));
+	peg.addParser("number02", 
+		peg.fn(
+			peg.seq(
+				peg.bind("a",peg.ref("DIGITS")),
+				peg.ref("dot")),
+		"result = number(a);"));
+			
+			
+	peg.addParser("number03", peg.fn(
+		peg.seq(
+			peg.ref("dot"),
+			peg.bind("a",peg.ref("DIGITS"))),
+		"result = number(a) / 10"));
+			
+	peg.addParser("number04", 
+		peg.fn(
+			peg.bind("a",peg.ref("DIGITS")),
+			"result = number(a)"));
+			
+	peg.addParser("DIGITS",
+		peg.fn(
+			peg.plus(peg.ref("DIGIT")),
+			"result = strConcat(result)"));
+	peg.addParser("DIGIT",peg.matchRange("0","9"));
+	peg.addParser("OPEN", peg.seq(peg.ref("ws"), peg.matchChar("{"), peg.ref("ws")));
+	peg.addParser("CLOSE", peg.seq(peg.ref("ws"), peg.matchChar("}"), peg.ref("ws")));
+	peg.addParser("COMMA", peg.seq(peg.ref("ws"), peg.matchChar(","), peg.ref("ws")));
+	peg.addParser("dot", peg.matchChar("."));
+	peg.addParser("ws",peg.star(peg.altRange(peg.matchChar(" "), peg.matchChar(Chars.Tab), peg.matchChar(Chars.CR), peg.matchChar(Chars.LF))));
+	
+endprocedure
+
+
+#endregion
+
+
+
+#region simpleFile
+
+#region debug
+procedure debugenter(parser, state, functionName) export
+	
+endprocedure
+
+procedure debugexit(parser, state, functionName) export
+	
+endprocedure
+
+procedure debugtext(parser, state, text) export
+	
+endprocedure
+
+#endregion
+function parseTextFromFile_simpleFile(fileName) export
+	
+	peg = CreatePEG();
+	grammar_6(peg);
+	settings = new Structure;
+	settings.Insert("debugFlag", true);
+	settings.Insert("debugObject", ThisObject);
+	
+	return peg.applyFromFile(fileName, "start", settings);
+	
+EndFunction
 
 #endregion
 
