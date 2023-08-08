@@ -1,85 +1,9 @@
 ﻿#region vars
-var settings;
-var parserStorage;
 var cnst;
 var id;
-var stream;
-var dataReader;
-#endregion
+var settings;
+var _grammar;
 
-#region testCheck
-
-function testCheck() export
-	return 1;
-endfunction
-
-#endregion
-
-/// @src https://helpf.pro/faq8/view/940.html
-function HexToDec(val _Hex)
-	base = 16;
-	_Hex = TrimAll(_Hex);
-	maxDeg = StrLen(_Hex) - 1;
-	result = 0;
-	charCounter = 1;
-	while maxDeg >=0 do
-		_HexСимвол = Mid(_Hex, charCounter, 1);
-		charIndex = Найти("0123456789ABCDEF", _HexСимвол) - 1;
-		result = result + charIndex * pow(base, maxDeg);
-		maxDeg = maxDeg - 1;
-		charCounter = charCounter + 1;
-	enddo;   
-	return result;
-endfunction 
-
-
-function id()
-	id = id + 1;
-	return id;
-endfunction
-
-function succes(state, result)
-	
-	return new Structure("succes, state, result", true, state, result);
-	
-endfunction
-
-function failure(stack)
-	localstate = moveStream(stack);
-	return new Structure("succes, state", false, localstate);
-	
-endfunction
-
-Function moveStream(stack)
-	
-	Var localstate, offset;
-	
-	localstate = pop(stack);
-	offset =  localstate.pos - stream.CurrentPosition();
-	if offset <> 0 then
-		stream.seek(offset,PositionInStream.Current);
-		dataReader = undefined;
-	endif;
-	Return localstate;
-
-EndFunction
-
-#region stack
-
-procedure push(stack, value)
-	stack.add(new structure("pos,line,column",value.pos, value.line, value.column));
-endprocedure
-
-function top(stack)
-	return stack[stack.UBound()];
-endfunction
-
-function pop(stack)
-	value = stack[stack.UBound()];
-	stack.delete(stack.UBound());
-	return value;
-endfunction
-	
 #endregion
 
 #region collection
@@ -116,7 +40,7 @@ function intoMap(key0, value0, key1=Undefined, value1 = Undefined, key2=Undefine
 	Return result;
 EndFunction
 
-procedure intoStructure(result, keys, start=undefined)
+procedure intoStructure_cnst(result, keys, start=undefined)
 	if start = undefined then
 		pos = result.count() + 1;
 	else
@@ -129,6 +53,28 @@ procedure intoStructure(result, keys, start=undefined)
 	enddo;
 		
 endprocedure
+
+function intoStructure(result = undefined, key0, value0, key1=Undefined, value1 = Undefined, key2=Undefined, value2 = Undefined, key3=Undefined, value3 = Undefined, key4=Undefined, value4 = Undefined, key5=Undefined, value5 = Undefined, key6=Undefined, value6 = Undefined, key7=Undefined, value7 = Undefined, key8=Undefined, value8 = Undefined, key9=Undefined, value9 = Undefined)
+
+	if result = undefined then
+		result = new Structure;
+	endif;
+	
+	addValue(result, key0, value0);
+	addValue(result, key1, value1);
+	addValue(result, key2, value2);
+	addValue(result, key3, value3);
+	addValue(result, key4, value4);
+	addValue(result, key5, value5);
+	addValue(result, key6, value6);
+	addValue(result, key7, value7);
+	addValue(result, key8, value8);
+	addValue(result, key9, value9);
+	
+	Return result;
+		
+endfunction
+
 
 function intoArray(
 	arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, 
@@ -173,531 +119,196 @@ endfunction
 
 #endregion
 
-#region declare
+#region testCheck
 
-function matchiChar(char) export
-	
-	return new Structure("type, set, expect", cnst.range, intoArray(upper(char), lower(char)), StrTemplate("[%1%2]",upper(char), lower(char)));
-	
-endfunction
-
-function matchChar(char) export
-	
-	return new Structure("type, set, expect", cnst.range, intoArray(char), StrTemplate("%1",char));
-	
-endfunction
-
-function matchByte(byte) export
-	
-	return new Structure("type, set, expect", cnst.ByteRange, intoArray(?(TypeOf(byte) = type("String"), HexToDec(byte), byte)), StrTemplate("%1", byte));
-	
-endfunction
-
-function matchString(string) export
-	
-	array = new array;
-	for x = 1 to StrLen(string) do
-		array.add(matchChar(Mid(string, x, 1)));
-	enddo;
-	
-	return seq2(array, StrTemplate("""%1""",string));
-endfunction
-
-function matchiString(string) export
-	
-	array = new array;
-	for x = 1 to StrLen(string) do
-		array.add(matchiChar(Mid(string, x, 1)));
-	enddo;
-	
-	return seq2(array,StrTemplate("i(""%1"")",string));
-
-endfunction
-
-
-function matchRange(fromChar, toChar) export
-	set = new Array;
-	for value = CharCode(fromChar) to CharCode(toChar) do
-		set.Add(Char(value));
-	enddo;
-	return new Structure("type,  set, expect", cnst.range, set, StrTemplate("[%1-%2]", fromChar, toChar));
-endfunction
-
-function seq(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, arg10= Undefined, arg11= Undefined, arg12 = Undefined, arg13= Undefined, arg14= Undefined, arg15= Undefined, arg16= Undefined, arg17= Undefined, arg18= Undefined, arg19= Undefined, arg20= Undefined, arg21= Undefined, arg22 = Undefined, arg23= Undefined, arg24= Undefined, arg25= Undefined, arg26= Undefined, arg27= Undefined, arg28= Undefined, arg29= Undefined  ) export
-	
-	seqArray = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29 ); 
-	return new Structure("type, args, expect", cnst.seq, seqArray, arg0.expect);
-	
-endfunction
-
-function seq2(seqArray,expect) export
-	
-	return new Structure("type, args, expect", cnst.seq, seqArray, expect);
-	
-endfunction
-
-function alt2(seqArray) export
-	
-	return new Structure("type, args, expect", cnst.alt, seqArray, "");
-	
-endfunction
-
-function neg(parser) export
-	
-	return new Structure("type, parser, expect", cnst.negative, parser, "");
-	
-endfunction
-
-function positive(parser) export
-	
-	return new Structure("type, parser, expect", cnst.positive, parser, "");
-	
-endfunction
-
-function alt(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, arg10= Undefined, arg11= Undefined, arg12 = Undefined, arg13= Undefined, arg14= Undefined, arg15= Undefined, arg16= Undefined, arg17= Undefined, arg18= Undefined, arg19= Undefined, arg20= Undefined, arg21= Undefined, arg22 = Undefined, arg23= Undefined, arg24= Undefined, arg25= Undefined, arg26= Undefined, arg27= Undefined, arg28= Undefined, arg29= Undefined  ) export
-	
-	seqArray = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29 ); 
-	return new Structure("type, args, expect", cnst.alt, seqArray, "");
-	
-endfunction
-
-function altRange(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, arg10= Undefined, arg11= Undefined, arg12 = Undefined, arg13= Undefined, arg14= Undefined, arg15= Undefined, arg16= Undefined, arg17= Undefined, arg18= Undefined, arg19= Undefined, arg20= Undefined, arg21= Undefined, arg22 = Undefined, arg23= Undefined, arg24= Undefined, arg25= Undefined, arg26= Undefined, arg27= Undefined, arg28= Undefined, arg29= Undefined  ) export
-	expect = new Array;
-	Array = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29 ); 
-	set = new array;
-	for each range in Array do
-		for each e in range.set do
-			if set.find(e) <> undefined then
-				continue;
-			endif;
-			set.add(e);
-		enddo;
-		expect.Add(range.expect);
-	enddo;
-	
-	return new Structure("type, set, expect", cnst.range, set, StrConcat(expect, " | "));
-	
-endfunction
-
-function any() export
-	
-	return new Structure("type, expect", cnst.any,  "any char (not eof)");
-	
-endfunction
-
-function eof() export
-	
-	return new Structure("type, expect", cnst.eof,  "eof input");
-	
-endfunction
-
-
-function ref(parser) export
-	
-	return new Structure("type, ref, expect", cnst.ref, parser, "");
-	
-endfunction
-
-
-function plus(parser) export
-	
-	return new Structure("type, parser, expect", cnst.plus, parser, "");
-	
-endfunction
-
-function star(parser) export
-	
-	return new Structure("type, parser, expect", cnst.star, parser);
-	
-endfunction
-
-function quest(parser, default = undefined) export
-	
-	return new Structure("type, parser, default, expect", cnst.quest, parser, default);
-	
-endfunction
-
-function fn(parser, code) export
-	
-	return new Structure("type, parser, code", cnst.fn, parser, code);
-	
-endfunction
-
-function bind(name,parser) export
-	
-	return new Structure("type, parser, name, expect", cnst.bind, parser, name, "");
-	
-endfunction
-
-function addParser(name,parser) export
-	parserStorage.insert(name,parser);
+function testCheck() export
+	return 1;
 endfunction
 
 #endregion
 
-#region stream
+function sType(typeName)
+	return intoStructure(,"type", typeName)
+endfunction
+
+function iType(typeName)
+	return intoStructure(,"type", cnst[typeName])
+endfunction
+
+procedure expectType(obj, typeName)
+	if typeof(obj) = type("Structure") 
+		and obj.property("type") 
+		and obj.type = typeName then
+		return;
+	endif;
+	raise StrTemplate("Expect type %1", typeName);
+endprocedure
+
+#region testCheck
+function context(string)
+	return intoStructure(sType("context"), "buffer", intoStructure(sType("string"), "buffer", string), "position", 1);
+endfunction
+
+function getPosition(obj)
+	expectType(obj,"context");
+	return obj.position;
+endfunction
+
+function getBuffer(obj)
+	expectType(obj,"context");
+	return obj.buffer.buffer;
+endfunction
+
+#endregion
+
+function success(context, value, position = undefined)
+	return intoStructure(sType("success"), "value", value, "position", ?(position = undefined, context.position, position));
+endfunction
+
+function failure(context, message, position = undefined)
+	return intoStructure(sType("failure"), "message", message, "position", ?(position = undefined, context.position, position));
+endfunction
 
 
- 
-function initStream_fileName(fileName)
+function toString(obj)
+	if typeof(obj) = type("Structure") then
+		if obj.property("type") then
+			if obj.type = "context" then
+				return StrTemplate("Context[buffer,%1]", obj.position);
+			else
+				raise "unknown type " + obj.type;
+			endif;
+		else
+			raise "Expect property in strucutre"
+		endif;
+	else
+		raise "Expect strucutre"
+	endif;
+endfunction
+
+
+/// @src https://helpf.pro/faq8/view/940.html
+function HexToDec(val _Hex)
+	base = 16;
+	_Hex = TrimAll(_Hex);
+	maxDeg = StrLen(_Hex) - 1;
+	result = 0;
+	charCounter = 1;
+	while maxDeg >=0 do
+		_HexСимвол = Mid(_Hex, charCounter, 1);
+		charIndex = Найти("0123456789ABCDEF", _HexСимвол) - 1;
+		result = result + charIndex * pow(base, maxDeg);
+		maxDeg = maxDeg - 1;
+		charCounter = charCounter + 1;
+	enddo;   
+	return result;
+endfunction 
+
+function id()
+	id = id + 1;
+	return id;
+endfunction
+
+function convertChar(char)
+	if cnst.convertMap[char] = undefined then
+		return char;
+	endif;
+	return cnst.convertMap[char];
+endfunction
+
+
+#region parsers   
+
+function grammar(name, parser) export
+	_grammar.insert(name, parser);
+	return _grammar;
+endfunction
+
+
+function matchChar(char, expect="") export
 	
-	stream = undefined;
-	dataReader = undefined;
-	stream = new FileStream(fileName, FileOpenMode.Open);
-	stream.seek(0,PositionInStream.Begin);
-	
-	if dataReader = undefined then
-		dataReader = new DataReader(stream);
+	if IsBlankString(expect) then
+		message = StrTemplate("Expect char '%1'", convertChar(char));
+	else
+		message = expect;
 	endif;
 	
-	res = dataReader.ReadByte();
-	res = dataReader.ReadByte();
-	res = dataReader.ReadByte();
-	
-	state = new Structure("pos, line, column", 3, 1, 1);
-	return state;
+	return intoStructure(iType("char"), "char", char, "message", message );
 	
 endfunction
+#endregion
 
- 
-function initStream_string(string)
-	stream = undefined;
-	dataReader = undefined;
-	stream = new MemoryStream;
-	writer = new DataWriter(stream);
-	writer.WriteLine(string);
-	stream.seek(0,PositionInStream.Begin);
-	return new Structure("pos, line, column", 0, 1, 1);
-	
-endfunction
-
-function readChar(state)
-	
-	if dataReader = undefined then
-		dataReader = new DataReader(stream);
-	endif;
-	
-	res = dataReader.ReadChars(1);
-	return res;
-endfunction
-
-function readByte(state)
-	
-	if dataReader = undefined then
-		dataReader = new DataReader(stream);
-	endif;
-	
-	res = dataReader.ReadByte();
-	return res;
-	
-endfunction
-
-
-function updateLineColumn_inc(state, char)
-	state.pos = stream.CurrentPosition();
+function updatePosition(context,char)
 	
 	if char = chars.CR then
-		state.line = state.line + 1;
-		state.column = 1;
-	else
-		state.column = state.column + 1;
 	endif;
 	
+	context.position = context.position + 1;
+	return context;
+
+endfunction
+
+function getChar(context)
+	
+	return Mid(getBuffer(context), getPosition(context), 1);
+	
+endfunction
+
+
+#region parsers   
+
+function onParseChar(context, grammar, parser)
+	char = getChar(context);
+	if char <> parser.char then
+		return failure(context, parser.message);
+	endif;
+	return success(updatePosition(context,char), char);
+endfunction
+
+function onParse(context, grammar, parser) 
+	
+	curParser = grammar[parser];
+	if not curParser.property("type") then
+		raise "incorrect parser type";
+	endif;
+	
+	if curParser.type = cnst.char then
+		result = onParseChar(context, grammar, curParser);
+	endif;
+	return result;
 endfunction
 
 #endregion
 
-#region stream
 
-function apply_range(stack, parser, state, context)
-	debugenter(parser, state, "apply_range");
-	push(stack, state);
-	char = readChar(state);
-	if parser.set.Find(char) = Undefined then
-		debugfailure(parser, state, "apply_range");
-		return failure(stack);
-	endif;
-	pop(stack);
-	updateLineColumn_inc(state, char);
-	debugsucces(parser, state, "apply_range",char);
-	return succes(state, char);
-endfunction
-
-function apply_alt(stack, parser, state, context)
-	push(stack,state);
-	for each arg in parser.args do
-		result = apply_parser(stack, arg, state, context);
-		if result.succes then
-			pop(stack);
-			return result;
-		endif;
-		state = moveStream(stack);
-		push(stack,state);
-	enddo;
-
-	return failure(stack);	
+function parse(buffer, grammar, start = "start" ) export
+	
+	context = context(buffer);
+	
+	return onparse(context, grammar, start)
+	
 	
 endfunction
-
-function apply_seq(stack, parser, state, context)
-	push(stack, state);
-	seqResult = new Array;
-	for each arg in parser.args do
-		result = apply_parser(stack, arg, state, context);
-		if not result.succes then
-			return failure(stack);	
-		endif;
-		seqResult.add(result.result);
-	enddo;
-	pop(stack);
-	return succes(state,seqResult);
-endfunction
-
-function apply_star(stack, parser, state, context)
-	seqResult = new Array;
-	while true do
-		push(stack, state);
-		result = apply_parser(stack, parser.parser, state, context);
-		if result.succes then
-			pop(stack);
-			seqResult.add(result.result);
-		else			
-			state = moveStream(stack);
-			return succes(state,seqResult);
-		endif;
-	enddo;
-endfunction
-
-function apply_plus(stack, parser, state, context)
-	push(stack, state);
-	seqResult = new Array;
-	result = apply_parser(stack, parser.parser, state, context);
-	if not result.succes then
-		return failure(stack);	
-	endif;
-	seqResult.add(result.result);
-	while true do
-		push(stack, state);
-		result = apply_parser(stack, parser.parser, state, context);
-		if result.succes then
-			seqResult.add(result.result);
-		else			
-			state = moveStream(stack);
-			return succes(state,seqResult);
-		endif;
-	enddo;
-endfunction
-
-function apply_quest(stack, parser, state, context)
-	push(stack,state);
-	result = apply_parser(stack, parser.parser, state, context);
-	pop(stack);
-	if result.succes then
-		result = result.result;
-	else
-		result = parser.default;
-	endif;
-	return succes(state, result);
-endfunction
-
-
-function apply_positive(stack, parser, state, context)
-	push(stack, state);
-	result = apply_parser(stack, parser.parser, state, context);
-	if result.succes then
-		state = moveStream(stack);
-		return succes(state, undefined);
-	else
-		return failure(stack);
-	endif;
-endfunction
-
-function apply_negative(stack, parser, state, context)
-	push(stack, state);
-	result = apply_parser(stack, parser.parser, state, context);
-	if not result.succes then
-		returnState = moveStream(stack);
-		return succes(returnState, undefined);
-	else
-		return failure(stack);
-	endif;
-endfunction
-
-function apply_fn(stack, parser, state, context)
-
-	push(stack,state);
-	newcontext = new map;
-	result = apply_parser(stack,parser.parser,state, newcontext);
-	if not result.succes then
-		return failure(stack);
-	endif;
-	result = result.result;
-	codeArray = new array;
-	for each x in newcontext do
-		codeArray.Add(StrTemplate("%1 = newcontext[""%1""];", x.Key));
-	enddo;
-	            
-	codeArray.Add(parser.code);
-	runCode = StrConcat(codeArray, "; ");
-	try
-		Execute runCode;
-	except
-		result = ErrorDescription();
-	endtry;
-	
-	pop(stack);
-	return succes(state,result);
-	
-endfunction
-
-function apply_bind(stack, parser, state, context)
-	push(stack, state);
-	result = apply_parser(stack, parser.parser,state, context);
-	if not result.succes then
-		return failure(stack);
-	endif;
-	context[parser.name] = result.result;
-	return succes(state, undefined);
-endfunction
-
-function apply_any(stack, parser, state, context)
-	char = readChar(state);
-	updateLineColumn_inc(state, char);
-	return succes(state, char);
-endfunction
-
-function apply_parser(stack, inParser, state, context)
-	if typeOf(inParser) = Type("string") then
-		parser = parserStorage[inParser];
-	else 
-		parser = inParser;
-	endif;
-	
-	debugenter(parser, state, "apply_parser");
-	
-	if parser.type = cnst.range then
-		result = apply_range(stack, parser, state, context);
-	elsif parser.type = cnst.alt then
-		result = apply_alt(stack, parser, state, context);
-	elsif parser.type = cnst.seq then
-		result = apply_seq(stack, parser, state, context);
-	elsif parser.type = cnst.star then
-		result = apply_star(stack, parser, state, context);
-	elsif parser.type = cnst.plus then
-		result = apply_plus(stack, parser, state, context);
-	elsif parser.type = cnst.quest then
-		result = apply_quest(stack, parser, state, context);
-	elsif parser.type = cnst.positive then
-		result = apply_positive(stack, parser, state, context);
-	elsif parser.type = cnst.negative then
-		result = apply_negative(stack, parser, state, context);
-	elsif parser.type = cnst.fn then
-		result = apply_fn(stack, parser, state, context);
-	elsif parser.type = cnst.bind then
-		result = apply_bind(stack, parser, state, context);
-	elsif parser.type = cnst.any then
-		result = apply_any(stack, parser, state, context);
-	elsif parser.type = cnst.ref then
-		result = apply_parser(stack, parser.ref, state, context);
-	else                      
-		raise "Unknown type";
-	endif;
-	state = result.state;
-	debugexit(parser, state, "apply_parser");
-	
-	return result;
-	
-endfunction
-
-function apply(string, name) export
-	state = initStream_string(string);
-	stack = new Array;
-	result = apply_parser(stack, name, state, Undefined);
-	return result;
-endfunction
-
-
-function defaultSettings()
-	
-	result = new Structure;
-	result.Insert("debugFlag", false);
-	result.Insert("debugObject", Undefined);
-	return result;
-	
-endfunction
-
-function applyFromFile(fieName, name, inSettings = undefined) export
-	if inSettings = undefined then
-		settings = defaultSettings();
-	else
-		settings = inSettings;
-	endif;
-	
-	state = initStream_fileName(fieName);
-	stack = new Array;
-	result = apply_parser(stack, name, state, Undefined);
-	return result;
-	
-endfunction
-
-
-
-#endregion
-
-procedure debugenter(parser, state, functionName)
-	
-	if not settings.debugFlag then
-		return;
-	endif;
-	settings.debugObject.debugenter(parser, state, functionName);
-	
-endprocedure
-
-procedure debugexit(parser, state, functionName)
-	
-	if not settings.debugFlag then
-		return;
-	endif;
-	settings.debugObject.debugexit(parser, state, functionName);
-	
-endprocedure
-
-
-procedure debugtext(parser, state, text)
-	
-	if not settings.debugFlag then
-		return;
-	endif;
-	settings.debugObject.debugtext(parser, state, text);
-	
-endprocedure
-
-
-procedure debugsucces(parser, state, functionName, result)
-	
-	if not settings.debugFlag then
-		return;
-	endif;
-	settings.debugObject.debugsucces(parser, state, functionName, result);
-	
-endprocedure
-
-procedure debugfailure(parser, state, functionName)
-	
-	if not settings.debugFlag then
-		return;
-	endif;
-	settings.debugObject.debugfailure(parser, state, functionName);
-	
-endprocedure
 
 
 procedure init()
 	id = 0;
+	_grammar = new Structure;
 	cnst = new Structure;
-	intoStructure(cnst,"inf",-1);
-	intoStructure(cnst,"eof, byteRange, range, alt, seq, plus, star, quest, fn, positive, negative, bind, ref, any");
+	intoStructure_cnst(cnst,"inf",-1);
+	intoStructure_cnst(cnst,"char");
 	parserStorage = new Structure;
+	
+	
+	convertMap = new Map;
+	convertMap[Chars.CR] = "\n";
+	convertMap[Chars.Tab] = "\t";
+	convertMap[Chars.LF] = "\r";
+	convertMap[Chars.FF] = "\FF\";
+	convertMap[Chars.NBSp] = "\NBSp\";
+	convertMap[Chars.VTab] = "\VTab\";
+	
+	intoStructure(cnst, "convertMap", convertMap);
 	
 endprocedure
 
