@@ -5,4 +5,6 @@
 
 @call vrunner decompileepf ./build/example.epf  ./src/epf
 @call vrunner decompileepf ./build/tests/testRikiPeg.epf  ./tests/epf
+@call vrunner decompileepf ./build/tests/debugRiki.epf  ./tests/epf
+@call vrunner decompileepf ./build/tests/exampleRiki.epf  ./tests/epf
 

@@ -51,11 +51,11 @@ procedure intoStructure_cnst(result, keys, start=undefined)
 		result.insert(structKey,pos);
 		pos = pos + 1;
 	enddo;
-		
+	
 endprocedure
 
 function intoStructure(result = undefined, key0, value0, key1=Undefined, value1 = Undefined, key2=Undefined, value2 = Undefined, key3=Undefined, value3 = Undefined, key4=Undefined, value4 = Undefined, key5=Undefined, value5 = Undefined, key6=Undefined, value6 = Undefined, key7=Undefined, value7 = Undefined, key8=Undefined, value8 = Undefined, key9=Undefined, value9 = Undefined)
-
+	
 	if result = undefined then
 		result = new Structure;
 	endif;
@@ -72,7 +72,7 @@ function intoStructure(result = undefined, key0, value0, key1=Undefined, value1 
 	addValue(result, key9, value9);
 	
 	Return result;
-		
+	
 endfunction
 
 
@@ -239,13 +239,23 @@ endfunction
 #endregion
 
 function updatePosition(context,char)
+	#region debug
+	if debug() then
+		onEnter("updatePosition", new Structure("context,char", context,char));
+	endif;
+    #endregion
 	
 	if char = chars.CR then
 	endif;
 	
 	context.position = context.position + 1;
+	#region debug
+	if debug() then
+		onExit("onParse", strTemplate("new position = %1"+context.position));
+	endif;
+	#endregion
 	return context;
-
+	
 endfunction
 
 function getChar(context)
@@ -258,14 +268,33 @@ endfunction
 #region parsers   
 
 function onParseChar(context, grammar, parser)
+	#region debug
+	if debug() then
+		onEnter("onParseChar", new Structure("context, grammar, parser", context, grammar, parser));
+	endif;
+    #endregion
+	
 	char = getChar(context);
 	if char <> parser.char then
-		return failure(context, parser.message);
+		result =  failure(context, parser.message);
+	else
+		result =  success(updatePosition(context,char), char);
 	endif;
-	return success(updatePosition(context,char), char);
+	
+	#region debug
+	if debug() then
+		onExit("onParse", new Structure("result", result));
+	endif;
+	#endregion
+	return result;
 endfunction
 
 function onParse(context, grammar, parser) 
+	#region debug
+	if debug() then
+		onEnter("onParse", new Structure("context, grammar, parser", context, grammar, parser));
+	endif;
+    #endregion
 	
 	curParser = grammar[parser];
 	if not curParser.property("type") then
@@ -275,6 +304,13 @@ function onParse(context, grammar, parser)
 	if curParser.type = cnst.char then
 		result = onParseChar(context, grammar, curParser);
 	endif;
+
+	#region debug
+	if debug() then
+		onExit("onParse", new Structure("result", result));
+	endif;
+	#endregion
+
 	return result;
 endfunction
 
@@ -283,15 +319,73 @@ endfunction
 
 function parse(buffer, grammar, start = "start" ) export
 	
+	#region debug
+	if debug() then
+		onEnter("parse", new Structure("buffer, grammar, start", buffer, grammar, start));
+	endif;
+    #endregion
+	
 	context = context(buffer);
 	
-	return onparse(context, grammar, start)
+	result = onParse(context, grammar, start);
 	
+	#region debug
+	if debug() then
+		onExit("parse", new Structure("result", result));
+	endif;
+	#endregion
 	
+	return result;
+
 endfunction
 
 
-procedure init()
+
+function initSettings()
+	initSettings = new Structure;
+	intoStructure(initSettings, "debugObject", undefined);
+	
+	return initSettings;
+	
+EndFunction
+
+
+#region debug
+function debug()
+	return settings.debug;
+endfunction
+
+procedure onEnter(name, args)
+
+	settings.debugObject.onEnter(name,args);
+	
+endprocedure
+
+procedure onExit(name, args)
+
+	settings.debugObject.onExit(name,args);
+	
+endprocedure
+
+#endregion
+
+procedure init(initSettings=undefined)
+	
+	if initSettings = undefined then
+		settings = initSettings();
+	elsif typeOf(initSettings) <> type("Structure") then
+		settings = initSettings();
+		for each x in settings do
+			if initSettings.ptoperty(x.key) then
+				settings[x.key] = x.value;
+			endif;
+		enddo;
+	else
+		raise "initSettings must be structure";
+	endif;
+	
+	settings.insert("debug", settings.debugObject = undefined);
+	
 	id = 0;
 	_grammar = new Structure;
 	cnst = new Structure;
@@ -309,6 +403,8 @@ procedure init()
 	convertMap[Chars.VTab] = "\VTab\";
 	
 	intoStructure(cnst, "convertMap", convertMap);
+	
+	
 	
 endprocedure
 
