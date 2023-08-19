@@ -6,21 +6,21 @@
 				<xr:ClassId>c3831ec8-d8d5-4f93-8a22-f9bfae07327f</xr:ClassId>
 				<xr:ObjectId>245037da-a849-42d0-9070-4ae0caac308c</xr:ObjectId>
 			</xr:ContainedObject>
-			<xr:GeneratedType name="ExternalDataProcessorObject.example" category="Object">
+			<xr:GeneratedType name="ExternalDataProcessorObject.console" category="Object">
 				<xr:TypeId>743df058-1a7f-4ef1-9046-1a7477b9272a</xr:TypeId>
 				<xr:ValueId>987b66e2-7d30-4e98-985c-31fee525d54a</xr:ValueId>
 			</xr:GeneratedType>
 		</InternalInfo>
 		<Properties>
-			<Name>example</Name>
+			<Name>console</Name>
 			<Synonym>
 				<v8:item>
 					<v8:lang>ru</v8:lang>
-					<v8:content>Example</v8:content>
+					<v8:content>Console</v8:content>
 				</v8:item>
 			</Synonym>
 			<Comment/>
-			<DefaultForm>ExternalDataProcessor.example.Form.Form</DefaultForm>
+			<DefaultForm>ExternalDataProcessor.console.Form.Form</DefaultForm>
 			<AuxiliaryForm/>
 		</Properties>
 		<ChildObjects>
