@@ -24,7 +24,7 @@
 Процедура ПередЗапускомТеста() Экспорт
 	
 	ФайлТеста = Новый Файл(ЭтотОбъект.ИспользуемоеИмяФайла);
-	ФайлОбработки = ФайлТеста.Путь + "..\rikiPEG.epf";
+	ФайлОбработки = ФайлТеста.Путь + "..\epf\rikiPEG.epf";
 	
 	riki = ВнешниеОбработки.Создать(ФайлОбработки, Ложь);
 	riki.init();
@@ -77,16 +77,15 @@
 
 #endregion
 
-
 #region test_range
 Процедура check_pos_range() Экспорт
 	
-	parser = riki.matchChar("z");
+	parser = riki.matchRange("a","z");
 	grammar = riki.Grammar("start",parser);
-	result = riki.parse("z", grammar );
+	result = riki.parse("t", grammar );
 	
 	
-	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("z");
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("t");
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(2);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -97,12 +96,12 @@
 
 Процедура check_neg_range() Экспорт
 	
-	parser = riki.matchChar("z");
+	parser = riki.matchRange("a","z");
 	grammar = riki.Grammar("start",parser);
-	result = riki.parse("a", grammar );
+	result = riki.parse("A", grammar );
 	
 	
-	Ожидаем.Что(result.message).Равно("Expect char 'z'");
+	Ожидаем.Что(result.message).Равно("Expect char from range [a-z]");
 	Ожидаем.Что(result.position.position).Равно(0);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
