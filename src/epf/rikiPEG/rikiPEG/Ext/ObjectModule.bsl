@@ -146,12 +146,15 @@ endprocedure
 
 #region testCheck
 function context(string)
-	return intoStructure(sType("context"), "buffer", intoStructure(sType("string"), "buffer", string), "position", 1);
+	return intoStructure(sType("context"), 
+		"buffer", intoStructure(sType("string"), "buffer", string), 
+		"position", intoStructure(sType("position"), "position", 0, "line", 1, "column", 1 ));
 endfunction
 
 function getPosition(obj)
 	expectType(obj,"context");
-	return obj.position;
+	expectType(obj.position,"position");
+	return obj.position.position;
 endfunction
 
 function getBuffer(obj)
@@ -162,10 +165,21 @@ endfunction
 #endregion
 
 function success(context, value, position = undefined)
+	#region debug
+	if debug() then
+		onSuccess(StrTemplate("succes at position = '%1' Value = '%2'", format(getPosition(context),"NG="), value));
+	endif;
+    #endregion
 	return intoStructure(sType("success"), "value", value, "position", ?(position = undefined, context.position, position));
 endfunction
 
 function failure(context, message, position = undefined)
+	#region debug
+	if debug() then
+		onFailure(StrTemplate("failure at position = '%1'", format(getPosition(context),"NG=")));
+	endif;
+    #endregion
+	
 	return intoStructure(sType("failure"), "message", message, "position", ?(position = undefined, context.position, position));
 endfunction
 
@@ -175,6 +189,8 @@ function toString(obj)
 		if obj.property("type") then
 			if obj.type = "context" then
 				return StrTemplate("Context[buffer,%1]", obj.position);
+			elsif obj.type = "position" then
+				return StrTemplate("pos = %1, line = %2, col = %3", format(obj.position, "NG="), format(obj.line, "NG="), format(obj.column, "NG="));
 			else
 				raise "unknown type " + obj.type;
 			endif;
@@ -241,17 +257,21 @@ endfunction
 function updatePosition(context,char)
 	#region debug
 	if debug() then
-		onEnter("updatePosition", new Structure("context,char", context,char));
+		onEnter("updatePosition", StrTemplate("char = '%1'", convertChar(char)));
 	endif;
     #endregion
 	
-	if char = chars.CR then
-	endif;
 	
-	context.position = context.position + 1;
+	context.position.position = context.position.position + 1;
+	if char = chars.CR then
+		context.position.line = context.position.line + 1;
+		context.position.column = 1;
+	else		
+		context.position.column = context.position.column + 1;
+	endif;
 	#region debug
 	if debug() then
-		onExit("onParse", strTemplate("new position = %1"+context.position));
+		onExit("updatePosition", StrTemplate("new position = %1", toString(context.position)));
 	endif;
 	#endregion
 	return context;
@@ -259,9 +279,22 @@ function updatePosition(context,char)
 endfunction
 
 function getChar(context)
+
+	#region debug
+	if debug() then
+		onEnter("getChar", StrTemplate("position = '%1'", toString(context)));
+	endif;
+    #endregion
 	
-	return Mid(getBuffer(context), getPosition(context), 1);
+	value = Mid(getBuffer(context), getPosition(context), 1);
+
+	#region debug
+	if debug() then
+		onExit("getChar", StrTemplate("read char  = '%1'", value));
+	endif;
+	#endregion
 	
+	return value;
 endfunction
 
 
@@ -270,7 +303,7 @@ endfunction
 function onParseChar(context, grammar, parser)
 	#region debug
 	if debug() then
-		onEnter("onParseChar", new Structure("context, grammar, parser", context, grammar, parser));
+		onEnter("onParseChar", StrTemplate("%1", parser.message));
 	endif;
     #endregion
 	
@@ -292,10 +325,10 @@ endfunction
 function onParse(context, grammar, parser) 
 	#region debug
 	if debug() then
-		onEnter("onParse", new Structure("context, grammar, parser", context, grammar, parser));
+		onEnter("onParse", StrTemplate("parser = '%1'", parser));
 	endif;
     #endregion
-	
+
 	curParser = grammar[parser];
 	if not curParser.property("type") then
 		raise "incorrect parser type";
@@ -339,8 +372,6 @@ function parse(buffer, grammar, start = "start" ) export
 
 endfunction
 
-
-
 function initSettings()
 	initSettings = new Structure;
 	intoStructure(initSettings, "debugObject", undefined);
@@ -348,7 +379,6 @@ function initSettings()
 	return initSettings;
 	
 EndFunction
-
 
 #region debug
 function debug()
@@ -361,6 +391,18 @@ procedure onEnter(name, args)
 	
 endprocedure
 
+procedure onFailure(args)
+
+	settings.debugObject.onFailure(args);
+	
+endprocedure
+
+procedure onSuccess(args)
+
+	settings.debugObject.onSuccess(args);
+	
+endprocedure
+
 procedure onExit(name, args)
 
 	settings.debugObject.onExit(name,args);
@@ -369,22 +411,22 @@ endprocedure
 
 #endregion
 
-procedure init(initSettings=undefined)
+procedure init(initSettings=undefined) export
 	
 	if initSettings = undefined then
 		settings = initSettings();
-	elsif typeOf(initSettings) <> type("Structure") then
+	elsif typeOf(initSettings) = type("Structure") then
 		settings = initSettings();
 		for each x in settings do
-			if initSettings.ptoperty(x.key) then
-				settings[x.key] = x.value;
+			if initSettings.property(x.key) then
+				settings[x.key] = initSettings[x.key];
 			endif;
 		enddo;
 	else
 		raise "initSettings must be structure";
 	endif;
 	
-	settings.insert("debug", settings.debugObject = undefined);
+	settings.insert("debug", not settings.debugObject = undefined);
 	
 	id = 0;
 	_grammar = new Structure;
@@ -408,6 +450,4 @@ procedure init(initSettings=undefined)
 	
 endprocedure
 
-
-init();
 

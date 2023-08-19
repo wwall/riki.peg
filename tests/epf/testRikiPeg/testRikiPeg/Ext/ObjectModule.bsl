@@ -15,7 +15,11 @@
 	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку");
 	НаборТестов.НачатьГруппу("Простые парсеры");
 	НаборТестов.Добавить("check_pos_char");
+	НаборТестов.Добавить("check_neg_char");
 	
+	НаборТестов.Добавить("check_pos_range");
+	НаборТестов.Добавить("check_neg_range");
+
 КонецПроцедуры
 
 Процедура ПередЗапускомТеста() Экспорт
@@ -24,7 +28,7 @@
 	ФайлОбработки = ФайлТеста.Путь + "..\rikiPEG.epf";
 	
 	riki = ВнешниеОбработки.Создать(ФайлОбработки, Ложь);
-	
+	riki.init();
 	
 КонецПроцедуры
 
@@ -39,6 +43,7 @@
 	
 КонецПроцедуры
 
+#region test_char
 Процедура check_pos_char() Экспорт
 	
 	parser = riki.matchChar("z");
@@ -47,10 +52,64 @@
 	
 	
 	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("z");
-	Ожидаем.Что(result.position).Равно(2);
-	//Ожидаем.Что(result.state.column).Равно(2);
-	//Ожидаем.Что(result.state.line).Равно(1);
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(2);
+	Ожидаем.Что(result.position.line).Равно(1);
 	Ожидаем.Что(result.type).Равно("success");
 	
 	
 КонецПроцедуры
+
+Процедура check_neg_char() Экспорт
+	
+	parser = riki.matchChar("z");
+	grammar = riki.Grammar("start",parser);
+	result = riki.parse("a", grammar );
+	
+	
+	Ожидаем.Что(result.message).Равно("Expect char 'z'");
+	Ожидаем.Что(result.position.position).Равно(0);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
+	
+	
+КонецПроцедуры
+
+#endregion
+
+
+#region test_range
+Процедура check_pos_range() Экспорт
+	
+	parser = riki.matchChar("z");
+	grammar = riki.Grammar("start",parser);
+	result = riki.parse("z", grammar );
+	
+	
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("z");
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(2);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+	
+КонецПроцедуры
+
+Процедура check_neg_range() Экспорт
+	
+	parser = riki.matchChar("z");
+	grammar = riki.Grammar("start",parser);
+	result = riki.parse("a", grammar );
+	
+	
+	Ожидаем.Что(result.message).Равно("Expect char 'z'");
+	Ожидаем.Что(result.position.position).Равно(0);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
+	
+	
+КонецПроцедуры
+
+#endregion
