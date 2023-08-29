@@ -148,7 +148,7 @@ endprocedure
 function context(string)
 	return intoStructure(sType("context"), 
 		"buffer", intoStructure(sType("string"), "buffer", string), 
-		"position", intoStructure(sType("position"), "position", 0, "line", 1, "column", 1 ));
+		"position", intoStructure(sType("position"), "position", 1, "line", 1, "column", 1 ));
 endfunction
 
 function getPosition(obj)
@@ -232,7 +232,11 @@ function convertChar(char)
 	return cnst.convertMap[char];
 endfunction
 
-
+function expectMessage(message) export
+	
+	return intoStructure(iType("expectMessage"), "message", message );
+	
+endfunction
 #region parsers   
 
 function grammar(name, parser) export
@@ -240,6 +244,17 @@ function grammar(name, parser) export
 	return _grammar;
 endfunction
 
+function matchiChar(char, expect="") export
+	
+	if IsBlankString(expect) then
+		message = StrTemplate("Expect char '%1' or '%2'", convertChar(lower(char)), convertChar(upper(char)));
+	else
+		message = expect;
+	endif;
+	
+	return intoStructure(iType("charClass"), "charClass", intoArray(lower(char), upper(char)), "message", message );
+	
+endfunction
 
 function matchChar(char, expect="") export
 	
@@ -249,9 +264,71 @@ function matchChar(char, expect="") export
 		message = expect;
 	endif;
 	
-	return intoStructure(iType("char"), "char", char, "message", message );
+	return intoStructure(iType("charClass"), "charClass", intoArray(char), "message", message );
 	
 endfunction
+
+function matchRange(charFrom, charTo, expect="") export
+	
+	if IsBlankString(expect) then
+		message = StrTemplate("Expect char from range [%1-%2]", convertChar(charFrom), convertChar(charTo));
+	else
+		message = expect;
+	endif;
+	
+	charClass = new Array;
+	for charCode = CharCode(charFrom) to CharCode(charTo) do 
+		charClass.Add(Char(charCode));
+	enddo;
+	
+	return intoStructure(iType("charClass"), "charClass", charClass, "message", message);
+	
+endfunction
+
+function matchSimpleString(string, expect="") export
+	
+	if IsBlankString(expect) then
+		message = StrTemplate("Expect string '%1'", string);
+	else
+		message = expect;
+	endif;
+	
+	return intoStructure(iType("string"), "string", string, "strLen", StrLen(string), "message", message);
+	
+endfunction
+
+function matchiSimpleString(string, expect="") export
+	
+	if IsBlankString(expect) then
+		message = StrTemplate("Expect case-insensitive string '%1'", string);
+	else
+		message = expect;
+	endif;
+	
+	return intoStructure(iType("istring"), "string", lower(string), "strLen", StrLen(string), "message", message);
+	
+endfunction
+
+function matchSeq(arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, 
+	arg10= Undefined, arg11= Undefined, arg12 = Undefined, arg13= Undefined, arg14= Undefined, arg15= Undefined, arg16= Undefined, arg17= Undefined, arg18= Undefined, arg19= Undefined, 
+	arg20= Undefined, arg21= Undefined, arg22 = Undefined, arg23= Undefined, arg24= Undefined, arg25= Undefined, arg26= Undefined, arg27= Undefined, arg28= Undefined, arg29= Undefined) export
+	
+	seqArray = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29);
+	message = undefined;
+	for i = -seqArray.UBound() to 0 do
+		
+		if seqArray[-i].type = cnst.expectMessage then 
+			message = seqArray[-i];
+			seqArray.delete(-i);
+		endif;
+		
+	enddo;
+	
+	return intoStructure(iType("seq"), "message", message, "parsers", intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29));
+	
+endfunction
+
+
 #endregion
 
 function updatePosition(context,char)
@@ -299,6 +376,67 @@ endfunction
 
 
 #region parsers   
+function onParseString(context, grammar, parser)
+	#region debug
+	if debug() then
+		onEnter("onParseString", StrTemplate("%1", parser.message));
+	endif;
+    #endregion
+	
+	savedPosition =  intoStructure(sType("position"), "position", context.position.position, "line", context.position.line, "column", context.position.column);
+	stringArray = new Array;
+	for i = 1 to parser.strLen do
+		char = getChar(context);
+		updatePosition(context,char);
+		stringArray.Add(char);
+	enddo;
+	
+	readedString = StrConcat(stringArray);
+	if parser.string = readedString then
+		result =  success(context, readedString);
+	else
+		context.position = savedPosition;
+		result =  failure(context, parser.message);
+	endif;
+	
+	#region debug
+	if debug() then
+		onExit("onParse", new Structure("result", result));
+	endif;
+	#endregion
+	return result;
+endfunction
+
+function onParseiString(context, grammar, parser)
+	#region debug
+	if debug() then
+		onEnter("onParseiString", StrTemplate("%1", parser.message));
+	endif;
+    #endregion
+	
+	savedPosition =  intoStructure(sType("position"), "position", context.position.position, "line", context.position.line, "column", context.position.column);
+	stringArray = new Array;
+	for i = 1 to parser.strLen do
+		char = getChar(context);
+		updatePosition(context,char);
+		stringArray.Add(char);
+	enddo;
+	
+	readedString = StrConcat(stringArray);
+	if parser.string = Lower(readedString) then
+		result =  success(context, readedString);
+	else
+		context.position = savedPosition;
+		result =  failure(context, parser.message);
+	endif;
+	
+	#region debug
+	if debug() then
+		onExit("onParse", new Structure("result", result));
+	endif;
+	#endregion
+	return result;
+endfunction
 
 function onParseChar(context, grammar, parser)
 	#region debug
@@ -308,10 +446,38 @@ function onParseChar(context, grammar, parser)
     #endregion
 	
 	char = getChar(context);
-	if char <> parser.char then
+	if parser.charClass.find(char) = Undefined then
 		result =  failure(context, parser.message);
 	else
 		result =  success(updatePosition(context,char), char);
+	endif;
+	
+	#region debug
+	if debug() then
+		onExit("onParse", new Structure("result", result));
+	endif;
+	#endregion
+	return result;
+endfunction
+
+function onParseSeq(context, grammar, parser)
+	#region debug
+	if debug() then
+		onEnter("onParseSeq", StrTemplate("%1", parser.message));
+	endif;
+    #endregion
+	
+	savedPosition =  intoStructure(sType("position"), "position", context.position.position, "line", context.position.line, "column", context.position.column);
+	
+	for each seqparser in parser.Parsers do 
+		
+	enddo;
+
+	if parser.string = 1 then
+		result =  success(context, 1);
+	else
+		context.position = savedPosition;
+		result =  failure(context, parser.message);
 	endif;
 	
 	#region debug
@@ -334,8 +500,16 @@ function onParse(context, grammar, parser)
 		raise "incorrect parser type";
 	endif;
 	
-	if curParser.type = cnst.char then
+	if curParser.type = cnst.charClass then
 		result = onParseChar(context, grammar, curParser);
+	elsif curParser.type = cnst.string then
+		result = onParseString(context, grammar, curParser);
+	elsif curParser.type = cnst.istring then
+		result = onParseiString(context, grammar, curParser);
+	elsif curParser.type = cnst.seq then
+		result = onParseSeq(context, grammar, curParser);
+	else 
+		raise StrTemplate("Unknown type '%1'", curParser.type );
 	endif;
 
 	#region debug
@@ -432,7 +606,12 @@ procedure init(initSettings=undefined) export
 	_grammar = new Structure;
 	cnst = new Structure;
 	intoStructure_cnst(cnst,"inf",-1);
-	intoStructure_cnst(cnst,"char");
+	intoStructure_cnst(cnst,"expectMessage");
+	intoStructure_cnst(cnst,"charClass");
+	intoStructure_cnst(cnst,"string");
+	intoStructure_cnst(cnst,"istring");
+	intoStructure_cnst(cnst,"seq");
+	
 	parserStorage = new Structure;
 	
 	
