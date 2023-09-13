@@ -228,6 +228,15 @@ function convertChar(char)
 	return cnst.convertMap[char];
 endfunction
 
+function convertString(string)
+	result = new Array;
+	for i = 1 to StrLen(string) do
+		result.Add(convertChar(Mid(string,i,1)));
+	enddo;
+	return StrConcat(result);
+endfunction
+
+
 function expectMessage(message) export
 	
 	return intoStructure(iType("expectMessage"), "message", message );
@@ -267,7 +276,7 @@ endfunction
 function matchRange(charFrom, charTo, expect="") export
 	
 	if IsBlankString(expect) then
-		message = StrTemplate("Expect char from range [%1-%2]", convertChar(charFrom), convertChar(charTo));
+		message = expectMessage(StrTemplate("Expect char from range [%1-%2]", convertChar(charFrom), convertChar(charTo)));
 	else
 		message = expect;
 	endif;
@@ -284,7 +293,7 @@ endfunction
 function matchSimpleString(string, expect="") export
 	
 	if IsBlankString(expect) then
-		message = StrTemplate("Expect string '%1'", string);
+		message = expectMessage(StrTemplate("Expect string '%1'", convertString(string)));
 	else
 		message = expect;
 	endif;
@@ -296,7 +305,7 @@ endfunction
 function matchiSimpleString(string, expect="") export
 	
 	if IsBlankString(expect) then
-		message = StrTemplate("Expect case-insensitive string '%1'", string);
+		message = expectMessage(StrTemplate("Expect case-insensitive string '%1'", ConvertString(string)));          
 	else
 		message = expect;
 	endif;
