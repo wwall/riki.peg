@@ -1,9 +1,6 @@
 ﻿#region vars
 var cnst;
 var id;
-var settings;
-var _grammar;
-
 #endregion
 
 #region collection
@@ -74,7 +71,6 @@ function intoStructure(result = undefined, key0, value0, key1=Undefined, value1 
 	Return result;
 	
 endfunction
-
 
 function intoArray(
 	arg0, arg1= Undefined, arg2 = Undefined, arg3= Undefined, arg4= Undefined, arg5= Undefined, arg6= Undefined, arg7= Undefined, arg8= Undefined, arg9= Undefined, 
@@ -239,15 +235,15 @@ function expectMessage(message) export
 endfunction
 #region parsers   
 
-function grammar(name, parser) export
-	_grammar.insert(name, parser);
-	return _grammar;
+function grammar(grammar, name, parser) export
+	grammar.insert(name, parser);
+	return grammar;
 endfunction
 
-function matchiChar(char, expect="") export
+function matchiChar(char, expect = Undefined) export
 	
 	if IsBlankString(expect) then
-		message = StrTemplate("Expect char '%1' or '%2'", convertChar(lower(char)), convertChar(upper(char)));
+		message = expectMessage(StrTemplate("Expect char '%1' or '%2'", convertChar(lower(char)), convertChar(upper(char))));
 	else
 		message = expect;
 	endif;
@@ -256,10 +252,10 @@ function matchiChar(char, expect="") export
 	
 endfunction
 
-function matchChar(char, expect="") export
+function matchChar(char, expect = Undefined) export
 	
-	if IsBlankString(expect) then
-		message = StrTemplate("Expect char '%1'", convertChar(char));
+	if expect = Undefined then
+		message = expectMessage(StrTemplate("Expect char '%1'", convertChar(char)));
 	else
 		message = expect;
 	endif;
@@ -488,6 +484,198 @@ function onParseSeq(context, grammar, parser)
 	return result;
 endfunction
 
+
+function onParseAlt(context, grammar, parser)
+	functionName = "onParseAlt";
+	#region debug
+	if debug() then
+		onEnter(functionName, StrTemplate("%1", parser.message));
+	endif;
+    #endregion
+	
+    result = Undefined;
+	raise "TODO "+functionName;
+	
+	#region debug
+	if debug() then
+		onExit(functionName, new Structure("result", result));
+	endif;
+	#endregion
+	return result;
+endfunction
+
+function onParseNot(context, grammar, parser)
+	functionName = "onParseNot";
+	#region debug
+	if debug() then
+		onEnter(functionName, StrTemplate("%1", parser.message));
+	endif;
+    #endregion
+	
+	result = Undefined;
+    raise "TODO "+functionName;
+	
+	
+	#region debug
+	if debug() then
+		onExit(functionName, new Structure("result", result));
+	endif;
+	#endregion
+	return result;
+endfunction
+
+function onParsePlus(context, grammar, parser)
+	functionName = "onParsePlus";
+	#region debug
+	if debug() then
+		onEnter(functionName, StrTemplate("%1", parser.message));
+	endif;
+    #endregion
+	
+    result = Undefined;
+	raise "TODO "+functionName;
+	
+	#region debug
+	if debug() then
+		onExit(functionName, new Structure("result", result));
+	endif;
+	#endregion
+	return result;
+endfunction
+
+function onParseStar(context, grammar, parser)
+	functionName = "onParseStar";
+	#region debug
+	if debug() then
+		onEnter(functionName, StrTemplate("%1", parser.message));
+	endif;
+    #endregion
+	
+    result = Undefined;
+    raise "TODO "+functionName;
+	
+	#region debug
+	if debug() then
+		onExit(functionName, new Structure("result", result));
+	endif;
+	#endregion
+	return result;
+endfunction
+
+function onParseQuest(context, grammar, parser)
+	functionName = "onParseQuest";
+	#region debug
+	if debug() then
+		onEnter(functionName, StrTemplate("%1", parser.message));
+	endif;
+    #endregion
+	
+    result = Undefined;
+    raise "TODO "+functionName;
+	
+	#region debug
+	if debug() then
+		onExit(functionName, new Structure("result", result));
+	endif;
+	#endregion
+	return result;
+endfunction
+
+function onParseAny(context, grammar, parser)
+	functionName = "onParseAny";
+	#region debug
+	if debug() then
+		onEnter(functionName, StrTemplate("%1", parser.message));
+	endif;
+    #endregion
+	
+    result = Undefined;
+    raise "TODO "+functionName;
+	
+	#region debug
+	if debug() then
+		onExit(functionName, new Structure("result", result));
+	endif;
+	#endregion
+	return result;
+endfunction
+
+function onParseEOF(context, grammar, parser)
+	functionName = "onParseEOF";
+	#region debug
+	if debug() then
+		onEnter(functionName, StrTemplate("%1", parser.message));
+	endif;
+    #endregion
+	
+    result = Undefined;
+    raise "TODO "+functionName;
+	
+	#region debug
+	if debug() then
+		onExit(functionName, new Structure("result", result));
+	endif;
+	#endregion
+	return result;
+endfunction
+
+function onParseBind(context, grammar, parser)
+	functionName = "onParseBind";
+	#region debug
+	if debug() then
+		onEnter(functionName, StrTemplate("%1", parser.message));
+	endif;
+    #endregion
+	
+    result = Undefined;
+    raise "TODO "+functionName;
+	
+	#region debug
+	if debug() then
+		onExit(functionName, new Structure("result", result));
+	endif;
+	#endregion
+	return result;
+endfunction
+
+function onParseLookAhead(context, grammar, parser)
+	functionName = "onParseLookAhead";
+	#region debug
+	if debug() then
+		onEnter(functionName, StrTemplate("%1", parser.message));
+	endif;
+    #endregion
+	
+    result = Undefined;
+    raise "TODO "+functionName;
+	
+	#region debug
+	if debug() then
+		onExit(functionName, new Structure("result", result));
+	endif;
+	#endregion
+	return result;
+endfunction
+
+function onParseFN(context, grammar, parser)
+	functionName = "onParseFN";
+	#region debug
+	if debug() then
+		onEnter(functionName, StrTemplate("%1", parser.message));
+	endif;
+    #endregion
+	
+    result = Undefined;
+    raise "TODO "+functionName;
+	
+	#region debug
+	if debug() then
+		onExit(functionName, new Structure("result", result));
+	endif;
+	#endregion
+	return result;
+endfunction
+
 function onParse(context, grammar, parser) 
 	#region debug
 	if debug() then
@@ -508,8 +696,28 @@ function onParse(context, grammar, parser)
 		result = onParseiString(context, grammar, curParser);
 	elsif curParser.type = cnst.seq then
 		result = onParseSeq(context, grammar, curParser);
+	elsif curParser.type = cnst.alt then
+		result = onParseAlt(context, grammar, curParser);
+	elsif curParser.type = cnst.not then
+		result = onParseNot(context, grammar, curParser);
+	elsif curParser.type = cnst.any then
+		result = onParseAny(context, grammar, curParser);
+	elsif curParser.type = cnst.eof then
+		result = onParseEof(context, grammar, curParser);
+	elsif curParser.type = cnst.lookahead then
+		result = onParseLookAhead(context, grammar, curParser);
+	elsif curParser.type = cnst.plus then
+		result = onParsePlus(context, grammar, curParser);
+	elsif curParser.type = cnst.star then
+		result = onParseStar(context, grammar, curParser);
+	elsif curParser.type = cnst.quest then
+		result = onParseQuest(context, grammar, curParser);
+	elsif curParser.type = cnst.bind then
+		result = onParseBind(context, grammar, curParser);
+	elsif curParser.type = cnst.fn then
+		result = onParseFN(context, grammar, curParser);
 	else 
-		raise StrTemplate("Unknown type '%1'", curParser.type );
+		raise StrTemplate("Unknown type '%1'", curParser.typeName[curParser.type]);
 	endif;
 
 	#region debug
@@ -556,30 +764,30 @@ EndFunction
 
 #region debug
 function debug()
-	return settings.debug;
+	return cnst.settings.debug;
 endfunction
 
 procedure onEnter(name, args)
 
-	settings.debugObject.onEnter(name,args);
+	cnst.settings.debugObject.onEnter(name,args);
 	
 endprocedure
 
 procedure onFailure(args)
 
-	settings.debugObject.onFailure(args);
+	cnst.settings.debugObject.onFailure(args);
 	
 endprocedure
 
 procedure onSuccess(args)
 
-	settings.debugObject.onSuccess(args);
+	cnst.settings.debugObject.onSuccess(args);
 	
 endprocedure
 
 procedure onExit(name, args)
 
-	settings.debugObject.onExit(name,args);
+	cnst.settings.debugObject.onExit(name,args);
 	
 endprocedure
 
@@ -612,6 +820,7 @@ procedure init(initSettings=undefined) export
 	intoStructure_cnst(cnst,"istring");
 	intoStructure_cnst(cnst,"seq");
 	
+	cnst.Insert("settings", settings);
 	parserStorage = new Structure;
 	
 	
