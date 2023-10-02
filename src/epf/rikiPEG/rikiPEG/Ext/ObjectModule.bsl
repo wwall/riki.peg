@@ -539,11 +539,36 @@ function getChar(context)
 endfunction
 
 
-#region parsers 
-function onParseString(context, grammar, parser, bind)
+#region parsers         
+
+function onParseTEMPLATE(context, grammar, parser, bind)
+	functionName = "onParseTEMPLATE";
 	#region debug
 	if debug() then
-		onEnter("onParseString", StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
+	endif;
+	#endregion
+	
+	savedPosition = intoStructure(sType("position"), "position", context.position.position, "line", context.position.line, "column", context.position.column);
+	result = onParse(context,grammar, parser.parser, bind);
+	context.position = savedPosition;
+	
+	result = undefined;
+	raise "Write code for TEMPLATE";
+	
+	#region debug
+	if debug() then
+		onExit(functionName, withPosition(context, new Structure("result", result)));
+	endif;
+	#endregion
+	return result;
+endfunction
+
+function onParseString(context, grammar, parser, bind)
+	functionName = "onParseString";
+	#region debug
+	if debug() then
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
 	
@@ -565,18 +590,20 @@ function onParseString(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit("onParse", new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	return result;
 endfunction
 
 function onParseiString(context, grammar, parser, bind)
+	functionName = "onParseiString";
 	#region debug
 	if debug() then
-		onEnter("onParseiString", StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
+
 	
 	savedPosition = intoStructure(sType("position"), "position", context.position.position, "line", context.position.line, "column", context.position.column);
 	stringArray = new Array;
@@ -596,16 +623,17 @@ function onParseiString(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit("onParse", new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	return result;
 endfunction
 
 function onParseChar(context, grammar, parser, bind)
+	functionName = "onParseChar";
 	#region debug
 	if debug() then
-		onEnter("onParseChar", StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
 	
@@ -618,7 +646,7 @@ function onParseChar(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit("onParse", new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	return result;
@@ -628,7 +656,7 @@ function onParseSeq(context, grammar, parser, bind)
 	functionName = "onParseSeq";
 	#region debug
 	if debug() then
-		onEnter(functionName, StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
 	
@@ -651,7 +679,7 @@ function onParseSeq(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit(functionName, new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	
@@ -662,7 +690,7 @@ function onParseAlt(context, grammar, parser, bind)
 	functionName = "onParseAlt";
 	#region debug
 	if debug() then
-		onEnter(functionName, StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
 	
@@ -685,7 +713,7 @@ function onParseAlt(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit(functionName, new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	return result;
@@ -695,7 +723,7 @@ function onParseNot(context, grammar, parser, bind)
 	functionName = "onParseNot";
 	#region debug
 	if debug() then
-		onEnter(functionName, StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
 	
@@ -709,7 +737,7 @@ function onParseNot(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit(functionName, new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	return result;
@@ -719,7 +747,7 @@ function onParsePlus(context, grammar, parser, bind)
 	functionName = "onParsePlus";
 	#region debug
 	if debug() then
-		onEnter(functionName, StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
 	
@@ -742,7 +770,7 @@ function onParsePlus(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit(functionName, new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	return result;
@@ -752,7 +780,7 @@ function onParseStar(context, grammar, parser, bind)
 	functionName = "onParseStar";
 	#region debug
 	if debug() then
-		onEnter(functionName, StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
 	
@@ -771,7 +799,7 @@ function onParseStar(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit(functionName, new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	return result;
@@ -781,7 +809,7 @@ function onParseQuest(context, grammar, parser, bind)
 	functionName = "onParseQuest";
 	#region debug
 	if debug() then
-		onEnter(functionName, StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
 	
@@ -797,7 +825,7 @@ function onParseQuest(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit(functionName, new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	return result;
@@ -807,10 +835,10 @@ function onParseAny(context, grammar, parser, bind)
 	functionName = "onParseAny";
 	#region debug
 	if debug() then
-		onEnter(functionName, StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
-	
+
 	result = Undefined;
 	
 	char = getChar(context);
@@ -823,7 +851,7 @@ function onParseAny(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit(functionName, new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	return result;
@@ -833,10 +861,10 @@ function onParseEOF(context, grammar, parser, bind)
 	functionName = "onParseEOF";
 	#region debug
 	if debug() then
-		onEnter(functionName, StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
-	
+
 	result = Undefined;
 	
 	char = getChar(context);
@@ -849,7 +877,7 @@ function onParseEOF(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit(functionName, new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	return result;
@@ -859,7 +887,7 @@ function onParseBind(context, grammar, parser, bind)
 	functionName = "onParseBind";
 	#region debug
 	if debug() then
-		onEnter(functionName, StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
 	
@@ -870,7 +898,7 @@ function onParseBind(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit(functionName, new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	return result;
@@ -880,7 +908,7 @@ function onParseLookAhead(context, grammar, parser, bind)
 	functionName = "onParseLookAhead";
 	#region debug
 	if debug() then
-		onEnter(functionName, StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
 	
@@ -896,7 +924,7 @@ function onParseLookAhead(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit(functionName, new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	return result;
@@ -906,7 +934,7 @@ function onParseFN(context, grammar, parser, bind)
 	functionName = "onParseFN";
 	#region debug
 	if debug() then
-		onEnter(functionName, StrTemplate("%1", parser.message));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message))));
 	endif;
 	#endregion
 	
@@ -929,16 +957,17 @@ function onParseFN(context, grammar, parser, bind)
 	
 	#region debug
 	if debug() then
-		onExit(functionName, new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
 	return result;
 endfunction
 
 function onParse(context, grammar, parser, localBind) 
+	functionName = "onParse";
 	#region debug
 	if debug() then
-		onEnter("onParse", StrTemplate("parser = '%1'", parser));
+		onEnter(functionName, withPosition(context, new Structure("message", parser)));
 	endif;
 	#endregion
 	
@@ -986,9 +1015,10 @@ function onParse(context, grammar, parser, localBind)
 	
 	#region debug
 	if debug() then
-		onExit("onParse", new Structure("result", result));
+		onExit(functionName, withPosition(context, new Structure("result", result)));
 	endif;
 	#endregion
+
 	
 	return result;
 endfunction
