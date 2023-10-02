@@ -1,8 +1,7 @@
 ﻿#region tests
 Перем КонтекстЯдра;
 Перем Ожидаем;
-
-Перем peg;
+Перем riki;
 
 Процедура Инициализация(КонтекстЯдраПараметр) Экспорт
 	КонтекстЯдра = КонтекстЯдраПараметр;
@@ -13,40 +12,59 @@
 	КонтекстЯдра = КонтекстЯдраПараметр;
 	НаборТестов.НачатьГруппу("Проверка");
 	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку");
-	НаборТестов.НачатьГруппу("Простые парсеры");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_char_pos");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_char_neg");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_ichar_pos");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_ichar_neg");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_string_pos");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_string_neg");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_istring_pos");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_istring_neg");
-	НаборТестов.НачатьГруппу("Повторения");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_12_pos");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_12_neg");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_02_pos");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_02_neg");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_01_pos");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_01_neg");
-	НаборТестов.НачатьГруппу("Просмотр");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_lookahead_pos_pos");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_lookahead_pos_neg");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_lookahead_neg_pos");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_lookahead_neg_neg");
-	НаборТестов.НачатьГруппу("Модификаторы");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_code_pos");
-	НаборТестов.Добавить("ТестДолжен_ВыполнитьПроверку_binding_pos");
-	
+	НаборТестов.НачатьГруппу("char");
+	НаборТестов.Добавить("check_pos_char");
+	НаборТестов.Добавить("check_neg_char");
+	НаборТестов.Добавить("check_pos_ichar");
+	НаборТестов.Добавить("check_neg_ichar");
+	НаборТестов.НачатьГруппу("range");
+	НаборТестов.Добавить("check_pos_range");
+	НаборТестов.Добавить("check_neg_range");
+	НаборТестов.НачатьГруппу("string");
+	НаборТестов.Добавить("check_pos_string");
+	НаборТестов.Добавить("check_neg_string");
+	НаборТестов.Добавить("check_pos_istring");
+	НаборТестов.Добавить("check_neg_istring");
+	НаборТестов.НачатьГруппу("seq");
+	НаборТестов.Добавить("check_pos_seq");
+	НаборТестов.Добавить("check_neg_seq");
+	НаборТестов.НачатьГруппу("alt");
+	НаборТестов.Добавить("check_pos_alt");
+	НаборТестов.Добавить("check_neg_alt");
+	НаборТестов.НачатьГруппу("not");
+	НаборТестов.Добавить("check_pos_not");
+	НаборТестов.Добавить("check_neg_not");
+	НаборТестов.НачатьГруппу("any");
+	НаборТестов.Добавить("check_pos_any");
+	НаборТестов.Добавить("check_neg_any");
+	НаборТестов.НачатьГруппу("eof");
+	НаборТестов.Добавить("check_pos_eof");
+	НаборТестов.Добавить("check_neg_eof");
+	НаборТестов.НачатьГруппу("quest");
+	НаборТестов.Добавить("check_pos_quest");
+	НаборТестов.Добавить("check_neg_quest");
+	НаборТестов.НачатьГруппу("star");
+	НаборТестов.Добавить("check_pos_star");
+	НаборТестов.Добавить("check_neg_star");
+	НаборТестов.НачатьГруппу("plus");
+	НаборТестов.Добавить("check_pos_plus");
+	НаборТестов.Добавить("check_neg_plus");
+	НаборТестов.НачатьГруппу("lookahead");
+	НаборТестов.Добавить("check_pos_lookahead");
+	НаборТестов.Добавить("check_neg_lookahead");
+	НаборТестов.НачатьГруппу("fn");
+	НаборТестов.Добавить("check_pos_fn");
+	НаборТестов.Добавить("check_neg_fn");
+
 КонецПроцедуры
 
 Процедура ПередЗапускомТеста() Экспорт
 	
 	ФайлТеста = Новый Файл(ЭтотОбъект.ИспользуемоеИмяФайла);
-	ФайлОбработки = ФайлТеста.Путь + "..\rikiPEG.epf";
+	ФайлОбработки = ФайлТеста.Путь + "..\epf\rikiPEG.epf";
 	
-	peg = ВнешниеОбработки.Создать(ФайлОбработки, Ложь);
-	
+	riki = ВнешниеОбработки.Создать(ФайлОбработки, Ложь);
+	riki.init();
 	
 КонецПроцедуры
 
@@ -57,261 +75,570 @@
 
 Процедура ТестДолжен_ВыполнитьПроверку() Экспорт
 	
-	Ожидаем.Что(peg.testCheck(),"Обработка корректно подключилась").Равно(1);
+	Ожидаем.Что(riki.testCheck(),"Обработка корректно подключилась").Равно(1);
 	
 КонецПроцедуры
 
-Процедура ТестДолжен_ВыполнитьПроверку_char_pos() Экспорт
-	
-	peg.addParser("test", peg.matchChar("б"));
-	result = peg.apply("болт", "test");
-	Ожидаем.Что(result.result,"Корректно прочли символ").Равно("б");
-	Ожидаем.Что(result.state.column).Равно(2);
-	Ожидаем.Что(result.state.pos).Равно(2);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(Истина);
-	
-	
-КонецПроцедуры
+#region test_char
 
-Процедура ТестДолжен_ВыполнитьПроверку_char_neg() Экспорт
+Процедура check_pos_char() Экспорт
+	grammar = new Structure;
+	parser = riki.matchChar("z");
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("z", grammar );
 	
-	peg.addParser("test", peg.matchChar("б"));
-	result = peg.apply("олт", "test");
-	Ожидаем.Что(result.state.column).Равно(1);
-	Ожидаем.Что(result.state.pos).Равно(0);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(ложь);
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("z");
+	Ожидаем.Что(result.position.position).Равно(2);
+	Ожидаем.Что(result.position.column).Равно(2);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
 	
 	
 КонецПроцедуры
 
-Процедура ТестДолжен_ВыполнитьПроверку_ichar_pos() Экспорт
+Процедура check_neg_char() Экспорт
 	
-	peg.addParser("test", peg.matchiChar("б"));
-	result = peg.apply("Болт", "test");
-	Ожидаем.Что(result.result,"Корректно прочли символ").Равно("Б");
-	Ожидаем.Что(result.state.column).Равно(2);
-	Ожидаем.Что(result.state.pos).Равно(2);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(Истина);
+	grammar = new Structure;
+	parser = riki.matchChar("z");
+	grammar = riki.Grammar(grammar,"start",parser);
+	result = riki.parse("a", grammar );
 	
-	peg.addParser("test", peg.matchiChar("б"));
-	result = peg.apply("болт", "test");
-	Ожидаем.Что(result.result,"Корректно прочли символ").Равно("б");
-	Ожидаем.Что(result.state.column).Равно(2);
-	Ожидаем.Что(result.state.pos).Равно(2);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(Истина);
 	
-КонецПроцедуры
-
-Процедура ТестДолжен_ВыполнитьПроверку_ichar_neg() Экспорт
-	
-	peg.addParser("test", peg.matchiChar("б"));
-	result = peg.apply("олт", "test");
-	Ожидаем.Что(result.state.column).Равно(1);
-	Ожидаем.Что(result.state.pos).Равно(0);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(ложь);
+	Ожидаем.Что(result.message.message).Равно("Expect char 'z'");
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
 	
 	
 КонецПроцедуры
 
-Процедура ТестДолжен_ВыполнитьПроверку_string_pos() Экспорт
+Процедура check_pos_ichar() Экспорт
+	grammar = new Structure;
+	parser = riki.matchiChar("z");
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("z", grammar );
 	
-	peg.addParser("test", peg.matchString("Болт"));
-	result = peg.apply("Болтик", "test");
-	Ожидаем.Что(result.result[0],"Корректно прочли строку").Равно("Б");
-	Ожидаем.Что(result.result[1],"Корректно прочли строку").Равно("о");
-	Ожидаем.Что(result.result[2],"Корректно прочли строку").Равно("л");
-	Ожидаем.Что(result.result[3],"Корректно прочли строку").Равно("т");
-	Ожидаем.Что(result.state.column).Равно(5);
-	Ожидаем.Что(result.state.pos).Равно(8);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(Истина);
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("z");
+	Ожидаем.Что(result.position.position).Равно(2);
+	Ожидаем.Что(result.position.column).Равно(2);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
 	
-КонецПроцедуры
-
-Процедура ТестДолжен_ВыполнитьПроверку_string_neg() Экспорт
+	result = riki.parse("Z", grammar );
 	
-	peg.addParser("test", peg.matchString("Болт"));
-	result = peg.apply("болтик", "test");
-	Ожидаем.Что(result.state.column).Равно(1);
-	Ожидаем.Что(result.state.pos).Равно(0);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(ложь);
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("Z");
+	Ожидаем.Что(result.position.position).Равно(2);
+	Ожидаем.Что(result.position.column).Равно(2);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
 	
 КонецПроцедуры
 
-Процедура ТестДолжен_ВыполнитьПроверку_istring_pos() Экспорт
+Процедура check_neg_ichar() Экспорт
 	
-	peg.addParser("test", peg.matchiString("Болт"));
-	result = peg.apply("БОЛтик", "test");
-	Ожидаем.Что(result.result[0],"Корректно прочли строку").Равно("Б");
-	Ожидаем.Что(result.result[1],"Корректно прочли строку").Равно("О");
-	Ожидаем.Что(result.result[2],"Корректно прочли строку").Равно("Л");
-	Ожидаем.Что(result.result[3],"Корректно прочли строку").Равно("т");
-	Ожидаем.Что(result.state.column).Равно(5);
-	Ожидаем.Что(result.state.pos).Равно(8);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(Истина);
+	grammar = new Structure;
+	parser = riki.matchiChar("z");
+	grammar = riki.Grammar(grammar,"start",parser);
+	result = riki.parse("a", grammar );
+	
+	
+	Ожидаем.Что(result.message.message).Равно("Expect char 'z' or 'Z'");
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
+	
+	
+КонецПроцедуры
+#endregion
+
+#region test_range
+Процедура check_pos_range() Экспорт
+	grammar = new Structure;
+	parser = riki.matchRange("a","z");
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("t", grammar );
+	
+	
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("t");
+	Ожидаем.Что(result.position.position).Равно(2);
+	Ожидаем.Что(result.position.column).Равно(2);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
 	
 КонецПроцедуры
 
-Процедура ТестДолжен_ВыполнитьПроверку_istring_neg() Экспорт
+Процедура check_neg_range() Экспорт
+	grammar = new Structure;
+	parser = riki.matchRange("a","z");
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("A", grammar );
 	
-	peg.addParser("test", peg.matchiString("Болт"));
-	result = peg.apply("ботик", "test");
-	Ожидаем.Что(result.state.column).Равно(1);
-	Ожидаем.Что(result.state.pos).Равно(0);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(ложь);
 	
-КонецПроцедуры
-
-Процедура ТестДолжен_ВыполнитьПроверку_12_pos() Экспорт
+	Ожидаем.Что(result.message.message).Равно("Expect char from range [a-z]");
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
 	
-	peg.addParser("test", peg.plus(peg.matchChar("А")));
-	result = peg.apply("ААб", "test");
-	Ожидаем.Что(result.result[0],"Корректно прочли строку").Равно("А");
-	Ожидаем.Что(result.result[1],"Корректно прочли строку").Равно("А");
-	Ожидаем.Что(result.state.column).Равно(3);
-	Ожидаем.Что(result.state.pos).Равно(4);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(Истина);
 	
 КонецПроцедуры
 
-Процедура ТестДолжен_ВыполнитьПроверку_12_neg() Экспорт
+#endregion
+
+#region test_string
+
+Процедура check_pos_string() Экспорт
+	grammar = new Structure;
+	parser = riki.matchSimpleString("abc");
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("abc", grammar );
 	
-	peg.addParser("test", peg.plus(peg.matchChar("А")));
-	result = peg.apply("ботик", "test");
-	Ожидаем.Что(result.state.column).Равно(1);
-	Ожидаем.Что(result.state.pos).Равно(0);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(ложь);
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("abc");
+	Ожидаем.Что(result.position.position).Равно(4);
+	Ожидаем.Что(result.position.column).Равно(4);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
 	
 КонецПроцедуры
 
-Процедура ТестДолжен_ВыполнитьПроверку_02_pos() Экспорт
+Процедура check_neg_string() Экспорт
 	
-	peg.addParser("test", peg.star(peg.matchChar("А")));
-	result = peg.apply("АААБОЛтик", "test");
-	Ожидаем.Что(result.result[0],"Корректно прочли строку").Равно("А");
-	Ожидаем.Что(result.result[1],"Корректно прочли строку").Равно("А");
-	Ожидаем.Что(result.result[2],"Корректно прочли строку").Равно("А");
-	Ожидаем.Что(result.state.column).Равно(4);
-	Ожидаем.Что(result.state.pos).Равно(6);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(Истина);
+	grammar = new Structure;
+	parser = riki.matchSimpleString("abc");
+	grammar = riki.Grammar(grammar,"start",parser);
+	result = riki.parse("cba", grammar );
 	
-КонецПроцедуры
-
-Процедура ТестДолжен_ВыполнитьПроверку_02_neg() Экспорт
 	
-	peg.addParser("test", peg.star(peg.matchChar("А")));
-	result = peg.apply("ботик", "test");
-	Ожидаем.Что(result.result.count()).Равно(0);
-	Ожидаем.Что(result.state.column).Равно(1);
-	Ожидаем.Что(result.state.pos).Равно(0);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(true);
+	Ожидаем.Что(result.message.message).Равно("Expect string 'abc'");
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
+	
 	
 КонецПроцедуры
 
-Процедура ТестДолжен_ВыполнитьПроверку_01_pos() Экспорт
+Процедура check_pos_istring() Экспорт
+	grammar = new Structure;
+	parser = riki.matchiSimpleString("abc");
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("aBc", grammar );
 	
-	peg.addParser("test", peg.quest(peg.matchChar("А")));
-	result = peg.apply("АААБОЛтик", "test");
-	Ожидаем.Что(result.result).Равно("А");
-	Ожидаем.Что(result.state.column).Равно(2);
-	Ожидаем.Что(result.state.pos).Равно(2);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(Истина);
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("aBc");
+	Ожидаем.Что(result.position.position).Равно(4);
+	Ожидаем.Что(result.position.column).Равно(4);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
 	
-КонецПроцедуры
-
-Процедура ТестДолжен_ВыполнитьПроверку_01_neg() Экспорт
-	peg.addParser("test", peg.quest(peg.matchChar("А")));
-	result = peg.apply("БОЛтик", "test");
-	Ожидаем.Что(result.result).Равно(Undefined);
-	Ожидаем.Что(result.state.column).Равно(1);
-	Ожидаем.Что(result.state.pos).Равно(0);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(Истина);
-
-КонецПроцедуры
-
-Процедура ТестДолжен_ВыполнитьПроверку_lookahead_pos_pos() Экспорт
-	
-	peg.addParser("test", peg.positive(peg.matchChar("А")));
-	result = peg.apply("АААБОЛтик", "test");
-	Ожидаем.Что(result.result).Равно(Undefined);
-	Ожидаем.Что(result.state.column).Равно(1);
-	Ожидаем.Что(result.state.pos).Равно(0);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(Истина);
-
 	
 КонецПроцедуры
 
-Процедура ТестДолжен_ВыполнитьПроверку_lookahead_pos_neg() Экспорт
+Процедура check_neg_istring() Экспорт
 	
-	peg.addParser("test", peg.positive(peg.matchChar("А")));
-	result = peg.apply("БОЛтик", "test");
-	Ожидаем.Что(result.state.column).Равно(1);
-	Ожидаем.Что(result.state.pos).Равно(0);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(false);
-
-
+	grammar = new Structure;
+	parser = riki.matchiSimpleString("abc");
+	grammar = riki.Grammar(grammar,"start",parser);
+	result = riki.parse("CbA", grammar );
+	
+	
+	Ожидаем.Что(result.message.message).Равно("Expect case-insensitive string 'abc'");
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
+	
+	
 КонецПроцедуры
+#endregion
 
-Процедура ТестДолжен_ВыполнитьПроверку_lookahead_neg_pos() Экспорт
+
+#region test_seq
+
+Процедура check_pos_seq() Экспорт
+	grammar = new Structure;
+	parser = riki.matchSeq(riki.matchRange("a","z"), riki.matchRange("0","9"));
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("a1", grammar );
 	
-	peg.addParser("test", peg.neg(peg.matchChar("А")));
-	result = peg.apply("БОЛтик", "test");
-	Ожидаем.Что(result.result).Равно(Undefined);
-	Ожидаем.Что(result.state.column).Равно(1);
-	Ожидаем.Что(result.state.pos).Равно(0);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(Истина);
-КонецПроцедуры
-
-Процедура ТестДолжен_ВыполнитьПроверку_lookahead_neg_neg() Экспорт
+	Ожидаем.Что(result.value[0].value,"Корректно прочли символ").Равно("a");
+	Ожидаем.Что(result.value[1].value,"Корректно прочли символ").Равно("1");
+	Ожидаем.Что(result.position.position).Равно(3);
+	Ожидаем.Что(result.position.column).Равно(3);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
 	
-	peg.addParser("test", peg.neg(peg.matchChar("А")));
-	result = peg.apply("АБОЛтик", "test");
-	Ожидаем.Что(result.state.column).Равно(1);
-	Ожидаем.Что(result.state.pos).Равно(0);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(false);
-
-
-КонецПроцедуры
-
-Процедура ТестДолжен_ВыполнитьПроверку_code_pos() Экспорт
-	
-	peg.addParser("test", peg.fn(peg.matchString("Болт"),"result = StrConcat(result,"""");"));
-	result = peg.apply("Болтик", "test");
-	Ожидаем.Что(result.result,"Корректно прочли строку").Равно("Болт");
-	Ожидаем.Что(result.state.column).Равно(5);
-	Ожидаем.Что(result.state.pos).Равно(8);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(Истина);
 	
 КонецПроцедуры
 
-Процедура ТестДолжен_ВыполнитьПроверку_binding_pos() Экспорт
+Процедура check_neg_seq() Экспорт
+	grammar = new Structure;
+	parser = riki.matchSeq(riki.matchRange("a","z"), riki.matchRange("0","9"));
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("1z", grammar );
 	
-	peg.addParser("test", peg.fn(peg.bind("a",peg.matchString("Болт")),"result = StrConcat(a,"""");"));
-	result = peg.apply("Болтик", "test");
-	Ожидаем.Что(result.result,"Корректно прочли строку").Равно("Болт");
-	Ожидаем.Что(result.state.column).Равно(5);
-	Ожидаем.Что(result.state.pos).Равно(8);
-	Ожидаем.Что(result.state.line).Равно(1);
-	Ожидаем.Что(result.succes).Равно(Истина);
+	
+	Ожидаем.Что(result.message.message).Равно("Expect char from range [a-z]");
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
+	
 	
 КонецПроцедуры
+
+#endregion
+
+#region test_alt
+
+Процедура check_pos_alt() Экспорт
+	grammar = new Structure;
+	parser = riki.matchAlt(riki.matchRange("a","z"), riki.matchRange("0","9"));
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("a1", grammar );
+	
+	Ожидаем.Что(result.value ,"Корректно прочли символ").Равно("a");
+	Ожидаем.Что(result.position.position).Равно(2);
+	Ожидаем.Что(result.position.column).Равно(2);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+	result = riki.parse("1", grammar );
+	
+	Ожидаем.Что(result.value ,"Корректно прочли символ").Равно("1");
+	Ожидаем.Что(result.position.position).Равно(2);
+	Ожидаем.Что(result.position.column).Равно(2);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+КонецПроцедуры
+
+Процедура check_neg_alt() Экспорт
+	grammar = new Structure;
+	parser = riki.matchAlt(riki.matchRange("a","z"), riki.matchRange("0","9"));
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("A", grammar );
+	
+	
+	Ожидаем.Что(result.message.message).Равно("Expect char from range [a-z] or Expect char from range [0-9]");
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
+	
+	
+КонецПроцедуры
+
+#endregion
+
+
+#region test_not
+
+Процедура check_pos_not() Экспорт
+	grammar = new Structure;
+	parser = riki.matchNot(riki.matchRange("a","z"));
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("1", grammar );
+	
+	Ожидаем.Что(result.value,"Корректно отработал not").Равно(Undefined);
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+	
+КонецПроцедуры
+
+Процедура check_neg_not() Экспорт
+	grammar = new Structure;
+	parser = riki.matchNot(riki.matchRange("a","z"));
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("a", grammar );
+	
+	
+	Ожидаем.Что(result.message.message).Равно("Expect not 'Expect char from range [a-z]'");
+	Ожидаем.Что(result.position.position).Равно(2);
+	Ожидаем.Что(result.position.column).Равно(2);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
+	
+	
+КонецПроцедуры
+
+#endregion
+
+
+#region test_any
+
+Процедура check_pos_any() Экспорт
+	grammar = new Structure;
+	parser = riki.matchAny();
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("1", grammar );
+	
+	Ожидаем.Что(result.value ,"Корректно прочли символ").Равно("1");
+	Ожидаем.Что(result.position.position).Равно(2);
+	Ожидаем.Что(result.position.column).Равно(2);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+	
+КонецПроцедуры
+
+Процедура check_neg_any() Экспорт
+	grammar = new Structure;
+	parser = riki.matchAny();
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("", grammar );
+	
+	
+	Ожидаем.Что(result.message.message).Равно("Expect any char");
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
+	
+	
+КонецПроцедуры
+
+#endregion
+
+#region test_eof
+
+Процедура check_pos_eof() Экспорт
+	grammar = new Structure;
+	parser = riki.matchEof();
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("", grammar );
+	
+	Ожидаем.Что(result.value ,"Корректно прочли символ").Равно(Undefined);
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+	
+КонецПроцедуры
+
+Процедура check_neg_eof() Экспорт
+	grammar = new Structure;
+	parser = riki.matchEOF();
+	grammar = riki.Grammar(grammar, "start",parser);
+	result = riki.parse("1", grammar );
+	
+	
+	Ожидаем.Что(result.message.message).Равно("Expect EOF");
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
+	
+	
+КонецПроцедуры
+
+#endregion
+
+
+#region test_star
+
+Процедура check_pos_star() Экспорт
+	grammar = new Structure;
+	parser = riki.matchStar(riki.matchChar("a"));
+	grammar = riki.Grammar(grammar, "start",parser);
+
+	result = riki.parse("aaa", grammar );
+	
+	Ожидаем.Что(result.value[0].value ,"Корректно прочли символ").Равно("a");
+	Ожидаем.Что(result.value.Count()).Равно(3);
+	Ожидаем.Что(result.position.position).Равно(4);
+	Ожидаем.Что(result.position.column).Равно(4);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+	
+КонецПроцедуры
+
+Процедура check_neg_star() Экспорт
+	grammar = new Structure;
+	parser = riki.matchStar(riki.matchChar("a"));
+	grammar = riki.Grammar(grammar, "start",parser);
+
+	result = riki.parse("123", grammar );
+	
+	Ожидаем.Что(result.value.Count()).Равно(0);
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+	
+КонецПроцедуры
+
+#endregion
+
+
+#region test_quest
+
+Процедура check_pos_quest() Экспорт
+	grammar = new Structure;
+	parser = riki.matchQuest(riki.matchChar("a"));
+	grammar = riki.Grammar(grammar, "start",parser);
+
+	result = riki.parse("a", grammar );
+	
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("a");
+	Ожидаем.Что(result.position.position).Равно(2);
+	Ожидаем.Что(result.position.column).Равно(2);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+	
+КонецПроцедуры
+
+Процедура check_neg_quest() Экспорт
+	grammar = new Structure;
+	parser = riki.matchQuest(riki.matchChar("a"));
+	grammar = riki.Grammar(grammar, "start",parser);
+
+	result = riki.parse("1", grammar );
+	
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно(undefined);
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+	
+КонецПроцедуры
+
+#endregion
+
+
+
+#region test_plus
+
+Процедура check_pos_plus() Экспорт
+	grammar = new Structure;
+	parser = riki.matchPlus(riki.matchChar("a"));
+	grammar = riki.Grammar(grammar, "start",parser);
+
+	result = riki.parse("aa", grammar );
+	
+	Ожидаем.Что(result.value[0].value,"Корректно прочли символ").Равно("a");
+	Ожидаем.Что(result.value[1].value,"Корректно прочли символ").Равно("a");
+	Ожидаем.Что(result.position.position).Равно(3);
+	Ожидаем.Что(result.position.column).Равно(3);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+	
+КонецПроцедуры
+
+Процедура check_neg_plus() Экспорт
+	grammar = new Structure;
+	parser = riki.matchPlus(riki.matchChar("a"));
+	grammar = riki.Grammar(grammar, "start",parser);
+
+	result = riki.parse("1", grammar );
+	
+	Ожидаем.Что(result.message.message).Равно("Expect seq [1..-1] of 'Expect char 'a''");
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
+	
+	
+КонецПроцедуры
+
+#endregion
+
+
+#region test_lookahead
+
+Процедура check_pos_lookahead() Экспорт
+	grammar = new Structure;
+	parser = riki.matchLookahead(riki.matchChar("a"));
+	grammar = riki.Grammar(grammar, "start",parser);
+
+	result = riki.parse("aa", grammar );
+	
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("a");
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+	
+КонецПроцедуры
+
+Процедура check_neg_lookahead() Экспорт
+	grammar = new Structure;
+	parser = riki.matchLookahead(riki.matchChar("a"));
+	grammar = riki.Grammar(grammar, "start",parser);
+
+	result = riki.parse("1a", grammar );
+	
+	Ожидаем.Что(result.message.message).Равно("Expect char 'a'");
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
+	
+	
+КонецПроцедуры
+
+#endregion
+
+
+#region test_plus
+
+Процедура check_pos_fn() Экспорт
+	grammar = new Structure;
+	parser = riki.matchFn(riki.matchChar("a"), "$$ = 1");
+	grammar = riki.Grammar(grammar, "start",parser);
+
+	result = riki.parse("aa", grammar );
+	
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно(1);
+	Ожидаем.Что(result.position.position).Равно(2);
+	Ожидаем.Что(result.position.column).Равно(2);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+	grammar = new Structure;
+	parser = riki.matchFn(riki.matchBind(riki.matchChar("a"),"first"), "$$ = $first.value+1");
+	grammar = riki.Grammar(grammar, "start",parser);
+
+	result = riki.parse("aa", grammar );
+	
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("a1");
+	Ожидаем.Что(result.position.position).Равно(2);
+	Ожидаем.Что(result.position.column).Равно(2);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("success");
+	
+КонецПроцедуры
+
+Процедура check_neg_fn() Экспорт
+	grammar = new Structure;
+	parser = riki.matchFn(riki.matchChar("a"), "$$ = 1");
+	grammar = riki.Grammar(grammar, "start",parser);
+
+	result = riki.parse("1", grammar );
+	
+	Ожидаем.Что(result.position.position).Равно(1);
+	Ожидаем.Что(result.position.column).Равно(1);
+	Ожидаем.Что(result.position.line).Равно(1);
+	Ожидаем.Что(result.type).Равно("failure");
+	
+	
+КонецПроцедуры
+
+#endregion
+
+
+
 

@@ -6,74 +6,40 @@
 				<xr:ClassId>c3831ec8-d8d5-4f93-8a22-f9bfae07327f</xr:ClassId>
 				<xr:ObjectId>245037da-a849-42d0-9070-4ae0caac308c</xr:ObjectId>
 			</xr:ContainedObject>
-			<xr:GeneratedType name="ExternalDataProcessorObject.example" category="Object">
+			<xr:GeneratedType name="ExternalDataProcessorObject.console" category="Object">
 				<xr:TypeId>743df058-1a7f-4ef1-9046-1a7477b9272a</xr:TypeId>
 				<xr:ValueId>987b66e2-7d30-4e98-985c-31fee525d54a</xr:ValueId>
 			</xr:GeneratedType>
 		</InternalInfo>
 		<Properties>
-			<Name>example</Name>
+			<Name>console</Name>
 			<Synonym>
 				<v8:item>
 					<v8:lang>ru</v8:lang>
-					<v8:content>Example</v8:content>
+					<v8:content>Console</v8:content>
 				</v8:item>
 			</Synonym>
 			<Comment/>
-			<DefaultForm>ExternalDataProcessor.example.Form.Form</DefaultForm>
+			<DefaultForm>ExternalDataProcessor.console.Form.Form</DefaultForm>
 			<AuxiliaryForm/>
 		</Properties>
 		<ChildObjects>
-			<Attribute uuid="4540cec9-c5be-4564-884e-4a95f73a5beb">
+			<Attribute uuid="d0dd79bb-e04d-4c83-b4ac-e1533352927b">
 				<Properties>
-					<Name>fileName</Name>
+					<Name>text</Name>
 					<Synonym>
 						<v8:item>
 							<v8:lang>ru</v8:lang>
-							<v8:content>File name</v8:content>
+							<v8:content>Text</v8:content>
 						</v8:item>
 					</Synonym>
 					<Comment/>
 					<Type>
 						<v8:Type>xs:string</v8:Type>
 						<v8:StringQualifiers>
-							<v8:Length>0</v8:Length>
+							<v8:Length>10</v8:Length>
 							<v8:AllowedLength>Variable</v8:AllowedLength>
 						</v8:StringQualifiers>
-					</Type>
-					<PasswordMode>false</PasswordMode>
-					<Format/>
-					<EditFormat/>
-					<ToolTip/>
-					<MarkNegatives>false</MarkNegatives>
-					<Mask/>
-					<MultiLine>false</MultiLine>
-					<ExtendedEdit>false</ExtendedEdit>
-					<MinValue xsi:nil="true"/>
-					<MaxValue xsi:nil="true"/>
-					<FillChecking>DontCheck</FillChecking>
-					<ChoiceFoldersAndItems>Items</ChoiceFoldersAndItems>
-					<ChoiceParameterLinks/>
-					<ChoiceParameters/>
-					<QuickChoice>Auto</QuickChoice>
-					<CreateOnInput>Auto</CreateOnInput>
-					<ChoiceForm/>
-					<LinkByType/>
-					<ChoiceHistoryOnInput>Auto</ChoiceHistoryOnInput>
-				</Properties>
-			</Attribute>
-			<Attribute uuid="f33e419e-2371-4e3f-9cae-3983d93fe00f">
-				<Properties>
-					<Name>value</Name>
-					<Synonym>
-						<v8:item>
-							<v8:lang>ru</v8:lang>
-							<v8:content>Value</v8:content>
-						</v8:item>
-					</Synonym>
-					<Comment/>
-					<Type>
-						<v8:Type>v8:ValueTree</v8:Type>
 					</Type>
 					<PasswordMode>false</PasswordMode>
 					<Format/>
