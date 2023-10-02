@@ -140,11 +140,12 @@ procedure expectType(obj, typeName)
 	raise StrTemplate("Expect type %1", typeName);
 endprocedure
 
-#region testCheck
+#region positions
+
 function context(string)
 	return intoStructure(sType("context"), 
 	"buffer", intoStructure(sType("string"), "buffer", string), 
-	"position", intoStructure(sType("position"), "position", 1, "line", 1, "column", 1 ));
+	"position", position(1, 1, 1));
 endfunction
 
 function getPosition(obj)
@@ -153,9 +154,27 @@ function getPosition(obj)
 	return obj.position.position;
 endfunction
 
+function getLocation(obj)
+	expectType(obj,"context");
+	expectType(obj.position,"position");
+	return obj.position;
+endfunction
+
+
 function getBuffer(obj)
 	expectType(obj,"context");
 	return obj.buffer.buffer;
+endfunction
+
+function position(position, line, column)
+
+	return intoStructure(sType("position"), "position", position, "line", line, "column", column )
+
+endfunction
+
+
+function withPosition(context, args)
+	return intoStructure(sType("debug"), "position", getLocation(context), "args", args);
 endfunction
 
 #endregion
@@ -979,13 +998,14 @@ endfunction
 
 function parse(buffer, grammar, start = "start" ) export
 	
+	context = context(buffer);
+
 	#region debug
 	if debug() then
-		onEnter("parse", new Structure("buffer, grammar, start", buffer, grammar, start));
+		onEnter("parse", withPosition(context, new Structure("buffer, grammar, start", buffer, grammar, start)));
 	endif;
 	#endregion
 	
-	context = context(buffer);
 	
 	result = onParse(context, grammar, start, new Map);
 	

@@ -8,5 +8,5 @@ Procedure PressExecuteButton(Button)
 EndProcedure
 
 Procedure OnOpen()
-	Controls.text.SetText("a");
+	Controls.text.SetText("zxyyy");
 EndProcedure

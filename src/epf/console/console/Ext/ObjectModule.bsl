@@ -7,8 +7,17 @@ procedure onEnter(name,args = Undefined) export
 	currentLoger = parent.Rows.Add();
 	currentLoger.type = "enter";
 	currentLoger.function = name;
-	currentLoger.value = args;
-	
+	if typeOf(args) = type("Structure") 
+		and args.property("type") 
+		and args.type = "debug" then
+		
+		currentLoger.column = args.position.column;
+		currentLoger.line = args.position.line;
+		currentLoger.position = args.position.position;
+		currentLoger.value = args.args;
+	else
+		currentLoger.value = args;
+	endif;
 endprocedure
 
 procedure onExit(name,args = Undefined) export
@@ -64,8 +73,12 @@ function parseText(text, DebugTree) export
 	
 	riki = CreateRikiPEG();
 	riki.init(settings);
-	parser = riki.matchChar("z");
-	grammar = riki.Grammar("start",parser);
+	grammar = new Structure;
+	parserZ = riki.matchChar("z");
+	parserX = riki.matchChar("x");
+	parserY = riki.matchChar("y");
+	parser = riki.matchSeq(parserZ, parserX, riki.matchPlus(parserY));
+	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse(text, grammar);
 	
 	DebugTree = VTDebug.Copy();
