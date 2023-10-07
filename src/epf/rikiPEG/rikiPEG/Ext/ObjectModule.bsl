@@ -230,7 +230,6 @@ function toString(obj)
 	endif;
 endfunction
 
-
 /// @src https://helpf.pro/faq8/view/940.html
 function HexToDec(val _Hex)
 	base = 16;
@@ -274,6 +273,7 @@ function expectMessage(message) export
 	return intoStructure(iType("expectMessage"), "message", message );
 	
 endfunction
+
 #region parsers 
 
 function grammar(grammar, name, parser) export
@@ -1142,5 +1142,88 @@ procedure init(initSettings = undefined) export
 	
 	
 endprocedure
+
+
+
+#region grammar
+
+procedure grammarAdd(grammar, name, value)
+	grammar.insert(name, value);
+endprocedure
+
+function matchRef(name)
+	return intoStructure(iType("ref"),"name",name);
+endfunction
+
+function initGrammar() export
+
+	grammar = new Structure;
+	
+	
+//# The Waxeye grammar language.
+//Grammar     <- Ws *Definition
+//Definition  <- Identifier (LeftArrow | PruneArrow | VoidArrow) Alternation Ws
+//Alternation <- Sequence *(Alt Sequence)
+//Sequence    <- +Unit
+//Unit        <- *(Prefix | Label)
+//				( Identifier !(LeftArrow | PruneArrow | VoidArrow)
+//				| Open Alternation Close
+//				| Action
+//				| Literal
+//				| CaseLiteral
+//				| CharClass
+//				| WildCard )
+//Prefix      <- [?*+:&!] Ws
+//Label       <- Identifier Ws :'=' Ws
+//Action      <- :'@' Identifier ?(:'<' Ws Identifier *(Comma Identifier) :'>') Ws
+//Identifier  <- [a-zA-Z_] *[a-zA-Z0-9_-] Ws
+
+
+//EndOfLine   <: '\r\n' | '\n' | '\r'
+EndOfLine = matchAlt(matchSeq(matchChar(chars.CR), matchChar(chars.LF)), matchChar(Chars.CR), matchChar(Chars.LF));
+grammarAdd(grammar,"EndOfLine", EndOfLine);
+//SComment    <: '#' *(!EndOfLine .) (EndOfLine | !.)
+SComment = matchSeq(matchChar("#"), matchStar(matchNot(matchRef("EndOfLine"))), matchAlt(matchRef("EndOfLine"), matchEOF()));
+grammarAdd(grammar,"SComment", SComment);
+//Ws          <: *([ \t] | EndOfLine | SComment | MComment)
+ws = matchStar(matchAlt(matchAlt(matchChar(" "), matchChar(Chars.Tab)),matchRef("EndOfLine"),matchRef("SComment")));
+grammarAdd(grammar,"WS", ws);
+//Comma       <: ',' Ws
+Comma = matchSeq(matchChar(","), matchRef("ws"));
+grammarAdd(grammar,"Comma", Comma);
+//Alt       <: ',' Ws
+Alt = matchSeq(matchChar("|"), matchRef("ws"));
+grammarAdd(grammar,"Alt", Alt);
+//Open       <: ',' Ws
+Open = matchSeq(matchChar("("), matchRef("ws"));
+grammarAdd(grammar,"Open", Open);
+//Close       <: ',' Ws
+Close = matchSeq(matchChar(")"), matchRef("ws"));
+grammarAdd(grammar,"Close", Close);
+//WildCard    <- :'.' Ws
+WildCard = matchSeq(matchChar("."), matchRef("ws"));
+grammarAdd(grammar,"WildCard", WildCard);
+//LeftArrow   <- :'<-' Ws
+LeftArrow = matchSeq(matchSimpleString("<-"), matchRef("ws"));
+grammarAdd(grammar,"LeftArrow", LeftArrow);
+//Hex         <- :'\\u{' [0-9A-Fa-f] ?[0-9A-Fa-f] ?[0-9A-Fa-f] ?[0-9A-Fa-f] ?[0-9A-Fa-f] ?[0-9A-Fa-f] :'}'
+hexChar = matchAlt(matchRange("0","9"),matchRange("a","f"),matchRange("A","F"));
+grammarAdd(grammar,"hexChar", hexChar);
+hexChar01 = matchQuest(matchRef("hexChar"));
+grammarAdd(grammar,"hexChar01", hexChar01);
+hex = matchSeq(matchSimpleString("\u{"),matchRef("hexChar"),matchRef("hexChar01"),matchRef("hexChar01"),matchRef("hexChar01"),matchRef("hexChar01"),matchRef("hexChar01"),matchChar("}"));
+grammarAdd(grammar,"hex", hex);
+//Char        <- '\\' [nrt\-\]\\] | !'\\' !']' !EndOfLine .
+
+
+//Literal     <- :['] +(!['] (LChar | Hex)) :['] Ws
+//CaseLiteral <- :["] +(!["] (LChar | Hex)) :["] Ws
+//LChar       <- '\\' [nrt'"\\] | !'\\' !EndOfLine .
+//CharClass   <- :'[' *(!']' Range) :']' Ws
+//Range       <- (Char | Hex) ?(:'-' (Char | Hex))
+
+
+endfunction
+#endregion
 
 

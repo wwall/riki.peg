@@ -63,6 +63,7 @@
 				</Properties>
 			</Attribute>
 			<Form>Form</Form>
+			<Template>grammar</Template>
 		</ChildObjects>
 	</ExternalDataProcessor>
 </MetaDataObject>
