@@ -7,8 +7,8 @@ Procedure PressExecuteButton(Button)
 	
 EndProcedure
 
-Procedure OnOpen()
-	Controls.text.SetText("zxyyy");
+Procedure OnOpen()  
+	Controls.text.SetText(GetTemplate("grammar").GetText());
 EndProcedure
 
 Procedure VTDebugOnActivateRow(Control)

@@ -73,12 +73,7 @@ function parseText(text, DebugTree) export
 	
 	riki = CreateRikiPEG();
 	riki.init(settings);
-	grammar = new Structure;
-	parserZ = riki.matchChar("z");
-	parserX = riki.matchChar("x");
-	parserY = riki.matchChar("y");
-	parser = riki.matchSeq(parserZ, parserX, riki.matchPlus(parserY));
-	grammar = riki.Grammar(grammar, "start",parser);
+	grammar = riki.initGrammar();
 	result = riki.parse(text, grammar);
 	
 	DebugTree = VTDebug.Copy();

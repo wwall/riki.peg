@@ -281,214 +281,130 @@ function grammar(grammar, name, parser) export
 	return grammar;
 endfunction
 
-function matchiChar(char, expect = Undefined) export
-	
-	if IsBlankString(expect) then
-		message = expectMessage(StrTemplate("Expect char '%1' or '%2'", convertChar(lower(char)), convertChar(upper(char))));
-	else
-		message = expect;
-	endif;
-	
-	return intoStructure(iType("charClass"), "charClass", intoArray(lower(char), upper(char)), "message", message );
+function matchiChar(expect, char) export
+
+	return intoStructure(iType("charClass"), "charClass", intoArray(lower(char), upper(char)), "message", expect );
 	
 endfunction
 
-function matchChar(char, expect = Undefined) export
+function matchChar(expect, char) export
 	
-	if expect = Undefined then
-		message = expectMessage(StrTemplate("Expect char '%1'", convertChar(char)));
-	else
-		message = expect;
-	endif;
-	
-	return intoStructure(iType("charClass"), "charClass", intoArray(char), "message", message );
+	return intoStructure(iType("charClass"), "charClass", intoArray(char), "message", expect );
 	
 endfunction
 
-function matchRange(charFrom, charTo, expect = "") export
+
+function matchSet(expect, arg0, arg1 = Undefined, arg2 = Undefined, arg3 = Undefined, arg4 = Undefined, arg5 = Undefined, arg6 = Undefined, arg7 = Undefined, arg8 = Undefined, arg9 = Undefined, 
+	arg10 = Undefined, arg11 = Undefined, arg12 = Undefined, arg13 = Undefined, arg14 = Undefined, arg15 = Undefined, arg16 = Undefined, arg17 = Undefined, arg18 = Undefined, arg19 = Undefined, 
+	arg20 = Undefined, arg21 = Undefined, arg22 = Undefined, arg23 = Undefined, arg24 = Undefined, arg25 = Undefined, arg26 = Undefined, arg27 = Undefined, arg28 = Undefined, arg29 = Undefined) export
 	
-	if IsBlankString(expect) then
-		message = expectMessage(StrTemplate("Expect char from range [%1-%2]", convertChar(charFrom), convertChar(charTo)));
-	else
-		message = expect;
-	endif;
+	setArray = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29);
+	charClass = new Array;
+	for each char in setArray do 
+		if char = undefined then
+			continue;
+		endif;
+		
+		charClass.Add(char);
+	enddo;
+	return intoStructure(iType("charClass"), "charClass", charClass, "message", expect);
+	
+endfunction
+
+
+function matchRange(expect, charFrom, charTo) export
 	
 	charClass = new Array;
 	for charCode = CharCode(charFrom) to CharCode(charTo) do 
 		charClass.Add(Char(charCode));
 	enddo;
 	
-	return intoStructure(iType("charClass"), "charClass", charClass, "message", message);
+	return intoStructure(iType("charClass"), "charClass", charClass, "message", expect);
 	
 endfunction
 
-function matchSimpleString(string, expect = "") export
+function matchSimpleString(expect, string ) export
 	
-	if IsBlankString(expect) then
-		message = expectMessage(StrTemplate("Expect string '%1'", convertString(string)));
-	else
-		message = expect;
-	endif;
-	
-	return intoStructure(iType("string"), "string", string, "strLen", StrLen(string), "message", message);
+	return intoStructure(iType("string"), "string", string, "strLen", StrLen(string), "message", expect);
 	
 endfunction
 
-function matchiSimpleString(string, expect = "") export
+function matchiSimpleString(expect, string) export
 	
-	if IsBlankString(expect) then
-		message = expectMessage(StrTemplate("Expect case-insensitive string '%1'", ConvertString(string))); 
-	else
-		message = expect;
-	endif;
 	
-	return intoStructure(iType("istring"), "string", lower(string), "strLen", StrLen(string), "message", message);
+	return intoStructure(iType("istring"), "string", lower(string), "strLen", StrLen(string), "message", expect);
 	
 endfunction
 
-function matchSeq(arg0, arg1 = Undefined, arg2 = Undefined, arg3 = Undefined, arg4 = Undefined, arg5 = Undefined, arg6 = Undefined, arg7 = Undefined, arg8 = Undefined, arg9 = Undefined, 
+function matchSeq(expect, arg0, arg1 = Undefined, arg2 = Undefined, arg3 = Undefined, arg4 = Undefined, arg5 = Undefined, arg6 = Undefined, arg7 = Undefined, arg8 = Undefined, arg9 = Undefined, 
 	arg10 = Undefined, arg11 = Undefined, arg12 = Undefined, arg13 = Undefined, arg14 = Undefined, arg15 = Undefined, arg16 = Undefined, arg17 = Undefined, arg18 = Undefined, arg19 = Undefined, 
 	arg20 = Undefined, arg21 = Undefined, arg22 = Undefined, arg23 = Undefined, arg24 = Undefined, arg25 = Undefined, arg26 = Undefined, arg27 = Undefined, arg28 = Undefined, arg29 = Undefined) export
 	
 	seqArray = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29);
-	message = undefined;
-	for i = -seqArray.UBound() to 0 do
-		
-		if seqArray[-i].type = cnst.expectMessage then 
-			message = seqArray[-i];
-			seqArray.delete(-i);
-		endif;
-		
-	enddo;
-	
-	return intoStructure(iType("seq"), "message", message, "parsers", intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29));
+	return intoStructure(iType("seq"), "message", expect, "parsers", seqArray);
 	
 endfunction
 
-function matchAlt(arg0, arg1 = Undefined, arg2 = Undefined, arg3 = Undefined, arg4 = Undefined, arg5 = Undefined, arg6 = Undefined, arg7 = Undefined, arg8 = Undefined, arg9 = Undefined, 
+function matchAlt(expect, arg0, arg1 = Undefined, arg2 = Undefined, arg3 = Undefined, arg4 = Undefined, arg5 = Undefined, arg6 = Undefined, arg7 = Undefined, arg8 = Undefined, arg9 = Undefined, 
 	arg10 = Undefined, arg11 = Undefined, arg12 = Undefined, arg13 = Undefined, arg14 = Undefined, arg15 = Undefined, arg16 = Undefined, arg17 = Undefined, arg18 = Undefined, arg19 = Undefined, 
 	arg20 = Undefined, arg21 = Undefined, arg22 = Undefined, arg23 = Undefined, arg24 = Undefined, arg25 = Undefined, arg26 = Undefined, arg27 = Undefined, arg28 = Undefined, arg29 = Undefined) export
 	
-	seqArray = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29);
-	message = undefined;
-	for i = -seqArray.UBound() to 0 do
-		
-		if seqArray[-i].type = cnst.expectMessage then 
-			message = seqArray[-i];
-			seqArray.delete(-i);
-		endif;
-		
-	enddo;
-	
-	return intoStructure(iType("alt"), "message", message, "parsers", intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29));
+	altArray = intoArray(arg0, arg1, arg2 , arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 , arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22 , arg23, arg24, arg25, arg26, arg27, arg28, arg29);
+	return intoStructure(iType("alt"), "message", expect, "parsers", altArray);
 	
 endfunction
 
-function matchNot(parser, expect = Undefined) export
+function matchNot(expect, parser ) export
 	
-	if expect = Undefined then
-		message = expectMessage(StrTemplate("Expect not '%1'", parser.message.message));
-	else
-		message = expect;
-	endif;
-	
-	return intoStructure(iType("not"), "parser", parser, "message", message );
+	return intoStructure(iType("not"), "parser", parser, "message", expect );
 	
 endfunction
 
-function matchAny(expect = Undefined) export
+function matchAny(expect) export
 	
-	if expect = Undefined then
-		message = expectMessage("Expect any char");
-	else
-		message = expect;
-	endif;
-	
-	return intoStructure(iType("any"), "message", message );
+	return intoStructure(iType("any"), "message", expect );
 	
 endfunction
 
-function matchEOF(expect = Undefined) export
+function matchEOF(expect) export
 	
-	if expect = Undefined then
-		message = expectMessage("Expect EOF");
-	else
-		message = expect;
-	endif;
-	
-	return intoStructure(iType("eof"), "message", message );
+	return intoStructure(iType("eof"), "message", expect );
 	
 endfunction
 
-function matchStar(parser, expect = Undefined) export
+function matchStar(expect, parser) export
 	
-	if expect = Undefined then
-		message = expectMessage(StrTemplate("Expect seq [0..-1] of '%1'", parser.message.message));
-	else
-		message = expect;
-	endif;
-	
-	return intoStructure(iType("star"), "parser", parser, "message", message );
+	return intoStructure(iType("star"), "parser", parser, "message", expect);
 	
 endfunction
 
-function matchPlus(parser, expect = Undefined) export
+function matchPlus(expect, parser) export
 	
-	if expect = Undefined then
-		message = expectMessage(StrTemplate("Expect seq [1..-1] of '%1'", parser.message.message));
-	else
-		message = expect;
-	endif;
-	
-	return intoStructure(iType("plus"), "parser", parser, "message", message );
+	return intoStructure(iType("plus"), "parser", parser, "message", expect );
 	
 endfunction
 
-function matchQuest(parser, expect = Undefined) export
+function matchQuest(expect, parser) export
 	
-	if expect = Undefined then
-		message = expectMessage(StrTemplate("Expect seq [0..1] of '%1'", parser.message.message));
-	else
-		message = expect;
-	endif;
-	
-	return intoStructure(iType("quest"), "parser", parser, "message", message );
+	return intoStructure(iType("quest"), "parser", parser, "message", expect );
 	
 endfunction
 
-function matchLookahead(parser, expect = Undefined) export
+function matchLookahead(expect, parser) export
 	
-	if expect = Undefined then
-		message = parser.message;
-	else
-		message = expect;
-	endif;
-	
-	return intoStructure(iType("lookahead"), "parser", parser, "message", message );
+	return intoStructure(iType("lookahead"), "parser", parser, "message", expect );
 	
 endfunction
 
-function matchFn(parser, code, expect = Undefined) export
+function matchFn(expect, parser, code ) export
 	
-	if expect = Undefined then
-		message = parser.message;
-	else
-		message = expect;
-	endif;
-	
-	return intoStructure(iType("fn"), "parser", parser, "code", code, "message", message );
+	return intoStructure(iType("fn"), "parser", parser, "code", code, "message", expect );
 	
 endfunction
 
-function matchBind(parser, name, expect = Undefined) export
+function matchBind(expect, parser, name ) export
 	
-	if expect = Undefined then
-		message = parser.message;
-	else
-		message = expect;
-	endif;
-	
-	return intoStructure(iType("bind"), "parser", parser, "name", name, "message", message );
+	return intoStructure(iType("bind"), "parser", parser, "name", name, "message", expect );
 	
 endfunction
 
@@ -1124,6 +1040,7 @@ procedure init(initSettings = undefined) export
 	intoStructure_cnst(cnst,"lookahead");
 	intoStructure_cnst(cnst,"fn");
 	intoStructure_cnst(cnst,"bind");
+	intoStructure_cnst(cnst,"ref");
 	
 	cnst.Insert("settings", settings);
 	parserStorage = new Structure;
@@ -1151,77 +1068,134 @@ procedure grammarAdd(grammar, name, value)
 	grammar.insert(name, value);
 endprocedure
 
-function matchRef(name)
-	return intoStructure(iType("ref"),"name",name);
+function matchRef(name, expect = Undefined)
+	if expect = Undefined then
+		message = expectMessage(StrTemplate("Expect parser %1", name));
+	else
+		message = expect;
+	endif;
+	
+	return intoStructure(iType("ref"),"name",name, "message", message);
 endfunction
 
 function initGrammar() export
 
 	grammar = new Structure;
 	
-	
-//# The Waxeye grammar language.
-//Grammar     <- Ws *Definition
-//Definition  <- Identifier (LeftArrow | PruneArrow | VoidArrow) Alternation Ws
-//Alternation <- Sequence *(Alt Sequence)
-//Sequence    <- +Unit
-//Unit        <- *(Prefix | Label)
-//				( Identifier !(LeftArrow | PruneArrow | VoidArrow)
-//				| Open Alternation Close
-//				| Action
-//				| Literal
-//				| CaseLiteral
-//				| CharClass
-//				| WildCard )
-//Prefix      <- [?*+:&!] Ws
-//Label       <- Identifier Ws :'=' Ws
-//Action      <- :'@' Identifier ?(:'<' Ws Identifier *(Comma Identifier) :'>') Ws
-//Identifier  <- [a-zA-Z_] *[a-zA-Z0-9_-] Ws
+//	
 
 
-//EndOfLine   <: '\r\n' | '\n' | '\r'
-EndOfLine = matchAlt(matchSeq(matchChar(chars.CR), matchChar(chars.LF)), matchChar(Chars.CR), matchChar(Chars.LF));
-grammarAdd(grammar,"EndOfLine", EndOfLine);
-//SComment    <: '#' *(!EndOfLine .) (EndOfLine | !.)
-SComment = matchSeq(matchChar("#"), matchStar(matchNot(matchRef("EndOfLine"))), matchAlt(matchRef("EndOfLine"), matchEOF()));
-grammarAdd(grammar,"SComment", SComment);
-//Ws          <: *([ \t] | EndOfLine | SComment | MComment)
-ws = matchStar(matchAlt(matchAlt(matchChar(" "), matchChar(Chars.Tab)),matchRef("EndOfLine"),matchRef("SComment")));
-grammarAdd(grammar,"WS", ws);
-//Comma       <: ',' Ws
-Comma = matchSeq(matchChar(","), matchRef("ws"));
-grammarAdd(grammar,"Comma", Comma);
-//Alt       <: ',' Ws
-Alt = matchSeq(matchChar("|"), matchRef("ws"));
-grammarAdd(grammar,"Alt", Alt);
-//Open       <: ',' Ws
-Open = matchSeq(matchChar("("), matchRef("ws"));
-grammarAdd(grammar,"Open", Open);
-//Close       <: ',' Ws
-Close = matchSeq(matchChar(")"), matchRef("ws"));
-grammarAdd(grammar,"Close", Close);
-//WildCard    <- :'.' Ws
-WildCard = matchSeq(matchChar("."), matchRef("ws"));
-grammarAdd(grammar,"WildCard", WildCard);
-//LeftArrow   <- :'<-' Ws
-LeftArrow = matchSeq(matchSimpleString("<-"), matchRef("ws"));
-grammarAdd(grammar,"LeftArrow", LeftArrow);
-//Hex         <- :'\\u{' [0-9A-Fa-f] ?[0-9A-Fa-f] ?[0-9A-Fa-f] ?[0-9A-Fa-f] ?[0-9A-Fa-f] ?[0-9A-Fa-f] :'}'
-hexChar = matchAlt(matchRange("0","9"),matchRange("a","f"),matchRange("A","F"));
-grammarAdd(grammar,"hexChar", hexChar);
-hexChar01 = matchQuest(matchRef("hexChar"));
-grammarAdd(grammar,"hexChar01", hexChar01);
-hex = matchSeq(matchSimpleString("\u{"),matchRef("hexChar"),matchRef("hexChar01"),matchRef("hexChar01"),matchRef("hexChar01"),matchRef("hexChar01"),matchRef("hexChar01"),matchChar("}"));
-grammarAdd(grammar,"hex", hex);
-//Char        <- '\\' [nrt\-\]\\] | !'\\' !']' !EndOfLine .
+////EndOfLine   <: '\r\n' | '\n' | '\r'
+//EndOfLine = matchAlt(matchSeq(matchChar(chars.CR), matchChar(chars.LF)), matchChar(Chars.CR), matchChar(Chars.LF), expectMessage("Expect EOL"));
+//grammarAdd(grammar,"EndOfLine", EndOfLine);
+////SComment    <: '#' *(!EndOfLine .) (EndOfLine | !.)
+//SComment = matchSeq(matchChar("#"), matchStar(matchNot(matchRef("EndOfLine"))), matchAlt(matchRef("EndOfLine"), matchEOF()));
+//grammarAdd(grammar,"SComment", SComment);
+////Ws          <: *([ \t] | EndOfLine | SComment | MComment)
+//ws = matchStar(matchAlt(matchAlt(matchChar(" "), matchChar(Chars.Tab)),matchRef("EndOfLine"),matchRef("SComment")));
+//grammarAdd(grammar,"WS", ws);
+////Comma       <: ',' Ws
+//Comma = matchSeq(matchChar(","), matchRef("ws"));
+//grammarAdd(grammar,"Comma", Comma);
+////Alt       <: '|' Ws
+//Alt = matchSeq(matchChar("|"), matchRef("ws"));
+//grammarAdd(grammar,"Alt", Alt);
+////Open       <: '(' Ws
+//Open = matchSeq(matchChar("("), matchRef("ws"));
+//grammarAdd(grammar,"Open", Open);
+////Close       <: ')' Ws
+//Close = matchSeq(matchChar(")"), matchRef("ws"));
+//grammarAdd(grammar,"Close", Close);
+////WildCard    <- :'.' Ws
+//WildCard = matchSeq(matchChar("."), matchRef("ws"));
+//grammarAdd(grammar,"WildCard", WildCard);
+////LeftArrow   <- :'<-' Ws
+//LeftArrow = matchSeq(matchSimpleString("<-"), matchRef("ws"));
+//grammarAdd(grammar,"LeftArrow", LeftArrow);
+////Hex         <- :'\\u{' [0-9A-Fa-f] ?[0-9A-Fa-f] ?[0-9A-Fa-f] ?[0-9A-Fa-f] ?[0-9A-Fa-f] ?[0-9A-Fa-f] :'}'
+//hexChar = matchAlt(matchRange("0","9"),matchRange("a","f"),matchRange("A","F"));
+//grammarAdd(grammar,"hexChar", hexChar);
+//hexChar01 = matchQuest(matchRef("hexChar"));
+//grammarAdd(grammar,"hexChar01", hexChar01);
+//hex = matchSeq(matchSimpleString("\u{"),matchRef("hexChar"),matchRef("hexChar01"),matchRef("hexChar01"),matchRef("hexChar01"),matchRef("hexChar01"),matchRef("hexChar01"),matchChar("}"));
+//grammarAdd(grammar,"hex", hex);
+////Char        <- '\\' [nrt\-\]\\] | !'\\' !']' !EndOfLine .
+//Char01 = matchSeq(matchChar("\"),matchAlt(matchChar("n"),matchChar("r"),matchChar("t"),matchChar("]")));
+//grammarAdd(grammar,"Char01", Char01);
+//Char02 = matchSeq(matchNot(matchChar("\")),matchNot(matchChar("]")),matchNot(matchRef("EndOfLine")),matchAny());
+//grammarAdd(grammar,"Char02", Char02);
+//Char = matchAlt(matchRef("Char01"),matchRef("Char02"));
+//grammarAdd(grammar,"Char", Char);
+////Range       <- (Char | Hex) ?(:'-' (Char | Hex))
+//Range01 = matchAlt(matchRef("Char"),matchRef("Hex"));
+//grammarAdd(grammar,"Range01", Range01);
+//Range = matchSeq(matchRef("Range01"),matchQuest(matchSeq(matchChar("-"),matchRef("Range01"))));
+//grammarAdd(grammar,"Range", Range);
+////LChar       <- '\\' [nrt'"\\] | !'\\' !EndOfLine .
+//LChar01 = matchSeq(matchChar("\"),matchSet("n","r","t","'","""","\",));
+//LChar02 = matchSeq(matchNot(matchChar("\")), matchNot(matchRef("EndOfLine")), matchAny());
+//LChar = matchAlt(LChar01, LChar02);
+//grammarAdd(grammar,"LChar", LChar);
+////Literal     <- :['] +(!['] (LChar | Hex)) :['] Ws
+//Literal = matchSeq(matchChar("'"), matchPlus(matchNot(matchChar("'")), matchAlt(matchRef("LChar"),matchRef("Hex"))),matchChar("'"));
+//grammarAdd(grammar,"Literal", Literal);
+////CaseLiteral <- :["] +(!["] (LChar | Hex)) :["] Ws
+//CaseLiteral = matchSeq(matchChar(""""), matchPlus(matchNot(matchChar("""")), matchAlt(matchRef("LChar"),matchRef("Hex"))),matchChar(""""));
+//grammarAdd(grammar,"CaseLiteral", CaseLiteral);
+////CharClass   <- :'[' *(!']' Range) :']' Ws
+//CharClass = matchSeq(matchChar("["), matchStar(matchNot(matchChar("]")), matchRef("Range")),matchChar("]"));
+//grammarAdd(grammar,"CharClass", CharClass);
 
+////Identifier  <- [a-zA-Z_] *[a-zA-Z0-9_-] Ws
+//Identifier  = matchSeq(
+//	matchAlt(
+//		matchChar("_"),
+//		matchRange("a","z"),
+//		matchRange("A","Z")),
+//	matchStar(
+//		matchAlt(
+//			matchRange("a","z"),
+//			matchRange("A","Z"),
+//			matchRange("0","9"), 
+//			matchChar("_"))),
+//	matchRef("ws"));
+//grammarAdd(grammar,"Identifier", Identifier);
+////Action      <- :'@' Identifier ?(:'<' Ws Identifier *(Comma Identifier) :'>') Ws
+//Action      = matchSeq(matchChar("@"), matchRef("Identifier"), matchQuest(matchSeq(matchchar("<"), matchRef("Ws"), matchRef("Identifier"), matchStar(matchSeq(matchRef("Comma"), matchRef("Identifier"))), matchChar(">"))), matchRef("Ws"));
+//grammarAdd(grammar,"Action", Action);
+////Label       <- Identifier Ws :'=' Ws
+//Label       = matchSeq(matchRef("Identifier"), matchRef("Ws"), matchChar("="), matchRef("Ws"));
+//grammarAdd(grammar,"Label", Label);
+////Prefix      <- [?*+:&!] Ws
+//Prefix = matchSeq(matchSet("?","*","+",":","&","!"), matchRef("Ws"));
+//grammarAdd(grammar,"Prefix", Prefix);
+////Unit        <- *(Prefix | Label)
+////				( Identifier !(LeftArrow | PruneArrow | VoidArrow)
+////				| Open Alternation Close
+////				| Action
+////				| Literal
+////				| CaseLiteral
+////				| CharClass
+////				| WildCard )
+//unit01 = matchStar(matchAlt(matchRef("Prefix"),matchRef("Label")));
+//unit02 = matchSeq(matchRef("Identifier"),matchNot(matchLookahead(matchRef("LeftArrow"))));
+//unit03 = matchSeq(matchRef("Open"),matchRef("Alternation"),matchRef("Close"));
+//Unit = matchSeq(unit01,matchAlt(unit02,unit03,matchRef("Action"),matchRef("Literal"),matchRef("CaseLiteral"),matchRef("CharClass"),matchRef("WildCard")));
+//grammarAdd(grammar,"Unit", Unit);
+////Sequence    <- +Unit
+//Sequence  = matchPlus(matchRef("Unit"));
+//grammarAdd(grammar,"Sequence", Sequence);
+////Alternation <- Sequence *(Alt Sequence)
+//Alternation = matchSeq(matchRef("Sequence"), matchStar(matchSeq(matchRef("Alt"),matchRef("Sequence"))));
+//grammarAdd(grammar,"Alternation", Alternation);
+////Definition  <- Identifier (LeftArrow | PruneArrow | VoidArrow) Alternation Ws
+//Definition  = matchSeq(matchRef("Identifier"), matchRef("LeftArrow"), matchRef("Alternation"), matchRef("Ws"));
+//grammarAdd(grammar,"Definition", Definition);
+////Grammar     <- Ws *Definition
+//startRule  = matchSeq(matchRef("Ws"), matchStar("Definition"));
+//grammarAdd(grammar,"start", startRule);
 
-//Literal     <- :['] +(!['] (LChar | Hex)) :['] Ws
-//CaseLiteral <- :["] +(!["] (LChar | Hex)) :["] Ws
-//LChar       <- '\\' [nrt'"\\] | !'\\' !EndOfLine .
-//CharClass   <- :'[' *(!']' Range) :']' Ws
-//Range       <- (Char | Hex) ?(:'-' (Char | Hex))
-
+return grammar;
 
 endfunction
 #endregion

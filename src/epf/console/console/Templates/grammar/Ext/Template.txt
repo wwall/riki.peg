@@ -32,12 +32,12 @@ VoidArrow   <- :'<:' Ws
 # Always voided #
 #################
 
-Alt         <: '|' Ws
-Open        <: '(' Ws
-Close       <: ')' Ws
+Alt         <- '|' Ws
+Open        <- '(' Ws
+Close       <- ')' Ws
 
-Comma       <: ',' Ws
-SComment    <: '#' *(!EndOfLine .) (EndOfLine | !.)
-MComment    <: '/*' *(MComment | !'*/' . ) '*/'
-EndOfLine   <: '\r\n' | '\n' | '\r'
-Ws          <: *([ \t] | EndOfLine | SComment | MComment)
+Comma       <- ',' Ws
+SComment    <- '#' *(!EndOfLine .) (EndOfLine | !.)
+MComment    <- '/*' *(MComment | !'*/' . ) '*/'
+EndOfLine   <- '\r\n' | '\n' | '\r'
+Ws          <- *([ \t] | EndOfLine | SComment | MComment)

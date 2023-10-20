@@ -83,7 +83,7 @@
 
 Процедура check_pos_char() Экспорт
 	grammar = new Structure;
-	parser = riki.matchChar("z");
+	parser = riki.matchChar(riki.expectMessage("Expect char 'z'"),"z");
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("z", grammar );
 	
@@ -99,7 +99,7 @@
 Процедура check_neg_char() Экспорт
 	
 	grammar = new Structure;
-	parser = riki.matchChar("z");
+	parser = riki.matchChar(riki.expectMessage("Expect char 'z'"),"z");
 	grammar = riki.Grammar(grammar,"start",parser);
 	result = riki.parse("a", grammar );
 	
@@ -115,7 +115,7 @@
 
 Процедура check_pos_ichar() Экспорт
 	grammar = new Structure;
-	parser = riki.matchiChar("z");
+	parser = riki.matchiChar(riki.expectMessage("Expect char 'z' or 'Z'"), "z");
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("z", grammar );
 	
@@ -138,7 +138,7 @@
 Процедура check_neg_ichar() Экспорт
 	
 	grammar = new Structure;
-	parser = riki.matchiChar("z");
+	parser = riki.matchiChar(riki.expectMessage("Expect char 'z' or 'Z'"), "z");
 	grammar = riki.Grammar(grammar,"start",parser);
 	result = riki.parse("a", grammar );
 	
@@ -156,7 +156,7 @@
 #region test_range
 Процедура check_pos_range() Экспорт
 	grammar = new Structure;
-	parser = riki.matchRange("a","z");
+	parser = riki.matchRange(riki.expectMessage("Expect char from range [a-z]"),"a","z");
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("t", grammar );
 	
@@ -172,7 +172,7 @@
 
 Процедура check_neg_range() Экспорт
 	grammar = new Structure;
-	parser = riki.matchRange("a","z");
+	parser = riki.matchRange(riki.expectMessage("Expect char from range [a-z]"),"a","z");
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("A", grammar );
 	
@@ -192,7 +192,7 @@
 
 Процедура check_pos_string() Экспорт
 	grammar = new Structure;
-	parser = riki.matchSimpleString("abc");
+	parser = riki.matchSimpleString(riki.expectMessage("Expect string 'abc'"), "abc");
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("abc", grammar );
 	
@@ -208,7 +208,7 @@
 Процедура check_neg_string() Экспорт
 	
 	grammar = new Structure;
-	parser = riki.matchSimpleString("abc");
+	parser = riki.matchSimpleString(riki.expectMessage("Expect string 'abc'"), "abc");
 	grammar = riki.Grammar(grammar,"start",parser);
 	result = riki.parse("cba", grammar );
 	
@@ -224,7 +224,7 @@
 
 Процедура check_pos_istring() Экспорт
 	grammar = new Structure;
-	parser = riki.matchiSimpleString("abc");
+	parser = riki.matchiSimpleString(riki.expectMessage("Expect case-insensitive string 'abc'"), "abc");
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("aBc", grammar );
 	
@@ -240,7 +240,7 @@
 Процедура check_neg_istring() Экспорт
 	
 	grammar = new Structure;
-	parser = riki.matchiSimpleString("abc");
+	parser = riki.matchiSimpleString(riki.expectMessage("Expect case-insensitive string 'abc'"), "abc");
 	grammar = riki.Grammar(grammar,"start",parser);
 	result = riki.parse("CbA", grammar );
 	
@@ -260,7 +260,7 @@
 
 Процедура check_pos_seq() Экспорт
 	grammar = new Structure;
-	parser = riki.matchSeq(riki.matchRange("a","z"), riki.matchRange("0","9"));
+	parser = riki.matchSeq(riki.expectMessage("seq Expect char from range [a-z]"), riki.matchRange(riki.expectMessage("Expect char from range [a-z]"), "a","z"), riki.matchRange(riki.expectMessage("Expect char from range [0-9]"), "0","9"));
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("a1", grammar );
 	
@@ -276,7 +276,7 @@
 
 Процедура check_neg_seq() Экспорт
 	grammar = new Structure;
-	parser = riki.matchSeq(riki.matchRange("a","z"), riki.matchRange("0","9"));
+	parser = riki.matchSeq(riki.expectMessage("seq Expect char from range [a-z]"), riki.matchRange(riki.expectMessage("Expect char from range [a-z]"), "a","z"), riki.matchRange(riki.expectMessage("Expect char from range [0-9]"), "0","9"));
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("1z", grammar );
 	
