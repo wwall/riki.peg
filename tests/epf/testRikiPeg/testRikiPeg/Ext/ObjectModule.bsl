@@ -387,7 +387,11 @@
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("a", grammar );
 	
-	Ожидаем.Что(result.message.message).Равно("Expect not char from range [a-z]");
+	if CurrentLanguage() = Metadata.Languages.Русский then
+		Ожидаем.Что(result.message.message).Равно("NOT {Ожидается символ из интервала [a-z]}");
+	else
+		Ожидаем.Что(result.message.message).Равно("NOT {Expect not char from range [a-z]}");
+	endif;
 	
 	Ожидаем.Что(result.position.position).Равно(2);
 	Ожидаем.Что(result.position.column).Равно(2);
@@ -576,7 +580,12 @@
 
 	result = riki.parse("1", grammar );
 	
-	Ожидаем.Что(result.message.message).Равно("Expect not empty seq of char [a]");
+	if CurrentLanguage() = Metadata.Languages.Русский then
+		Ожидаем.Что(result.message.message).Равно("seq [1..-1] {Ожидается символ [a]}");
+	else
+		Ожидаем.Что(result.message.message).Равно("seq [1..-1] {Expect char [a]}");
+	endif;
+
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -612,7 +621,11 @@
 
 	result = riki.parse("1a", grammar );
 	
-	Ожидаем.Что(result.message.message).Равно("Expect char [a]");
+	if CurrentLanguage() = Metadata.Languages.Русский then
+		Ожидаем.Что(result.message.message).Равно("Ожидается символ [a]");
+	else
+		Ожидаем.Что(result.message.message).Равно("Expect char [a]");
+	endif;
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);

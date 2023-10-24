@@ -228,10 +228,6 @@ function toString(obj)
 	endif;
 endfunction
 
-function getMessage(parser)
-	return ?(parser.property("message"), parser.message, "");
-EndFunction
-
 
 
 /// @src https://helpf.pro/faq8/view/940.html
@@ -796,7 +792,7 @@ function onParseQuest(context, grammar, parser, bind)
 	functionName = "onParseQuest";
 	#region debug
 	if debug() then
-		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", getMessage(parser)))));
+		onEnter(functionName, withPosition(context, new Structure("message", StrTemplate("%1", parser.message.message))));
 	endif;
 	#endregion
 	
@@ -904,7 +900,7 @@ function onParseLookAhead(context, grammar, parser, bind)
 	context.position = savedPosition;
 	
 	if isFailure(result) then
-		result = failure(context, getMessage(parser));
+		result = failure(context, getExpect(parser.parser));
 	else
 		result = success(context, result.value, savedPosition);
 	endif;
