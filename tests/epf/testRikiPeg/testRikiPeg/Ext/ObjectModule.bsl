@@ -83,7 +83,7 @@
 
 Процедура check_pos_char() Экспорт
 	grammar = new Structure;
-	parser = riki.matchChar(riki.expectMessage("Expect char 'z'"),"z");
+	parser = riki.matchChar("z");
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("z", grammar );
 	
@@ -99,12 +99,15 @@
 Процедура check_neg_char() Экспорт
 	
 	grammar = new Structure;
-	parser = riki.matchChar(riki.expectMessage("Expect char 'z'"),"z");
+	parser = riki.matchChar("z");
 	grammar = riki.Grammar(grammar,"start",parser);
 	result = riki.parse("a", grammar );
 	
-	
-	Ожидаем.Что(result.message.message).Равно("Expect char 'z'");
+	if CurrentLanguage() = Metadata.Languages.Русский then
+		Ожидаем.Что(result.message.message).Равно("Ожидается символ [z]");
+	else
+		Ожидаем.Что(result.message.message).Равно("Expect char [z]");
+	endif;
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -115,7 +118,7 @@
 
 Процедура check_pos_ichar() Экспорт
 	grammar = new Structure;
-	parser = riki.matchiChar(riki.expectMessage("Expect char 'z' or 'Z'"), "z");
+	parser = riki.matchiChar("z");
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("z", grammar );
 	
@@ -138,12 +141,16 @@
 Процедура check_neg_ichar() Экспорт
 	
 	grammar = new Structure;
-	parser = riki.matchiChar(riki.expectMessage("Expect char 'z' or 'Z'"), "z");
+	parser = riki.matchiChar("z");
 	grammar = riki.Grammar(grammar,"start",parser);
 	result = riki.parse("a", grammar );
 	
 	
-	Ожидаем.Что(result.message.message).Равно("Expect char 'z' or 'Z'");
+	if CurrentLanguage() = Metadata.Languages.Русский then
+		Ожидаем.Что(result.message.message).Равно("Ожидается символ [Z] или [z]");
+	else
+		Ожидаем.Что(result.message.message).Равно("Expect char [Z] or [z]");
+	endif;
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -156,7 +163,7 @@
 #region test_range
 Процедура check_pos_range() Экспорт
 	grammar = new Structure;
-	parser = riki.matchRange(riki.expectMessage("Expect char from range [a-z]"),"a","z");
+	parser = riki.matchRange("a","z");
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("t", grammar );
 	
@@ -172,12 +179,16 @@
 
 Процедура check_neg_range() Экспорт
 	grammar = new Structure;
-	parser = riki.matchRange(riki.expectMessage("Expect char from range [a-z]"),"a","z");
+	parser = riki.matchRange("a","z");
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("A", grammar );
 	
 	
-	Ожидаем.Что(result.message.message).Равно("Expect char from range [a-z]");
+	if CurrentLanguage() = Metadata.Languages.Русский then
+		Ожидаем.Что(result.message.message).Равно("Ожидается символ из интервала [a-z]");
+	else
+		Ожидаем.Что(result.message.message).Равно("Expect char from range [a-z]");
+	endif;
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -192,7 +203,7 @@
 
 Процедура check_pos_string() Экспорт
 	grammar = new Structure;
-	parser = riki.matchSimpleString(riki.expectMessage("Expect string 'abc'"), "abc");
+	parser = riki.matchSimpleString("abc");
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("abc", grammar );
 	
@@ -208,12 +219,16 @@
 Процедура check_neg_string() Экспорт
 	
 	grammar = new Structure;
-	parser = riki.matchSimpleString(riki.expectMessage("Expect string 'abc'"), "abc");
+	parser = riki.matchSimpleString("abc");
 	grammar = riki.Grammar(grammar,"start",parser);
 	result = riki.parse("cba", grammar );
 	
 	
-	Ожидаем.Что(result.message.message).Равно("Expect string 'abc'");
+	if CurrentLanguage() = Metadata.Languages.Русский then
+		Ожидаем.Что(result.message.message).Равно("Ожидается строка ""abc""");
+	else
+		Ожидаем.Что(result.message.message).Равно("Expect string ""abc""");
+	endif;
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -224,7 +239,7 @@
 
 Процедура check_pos_istring() Экспорт
 	grammar = new Structure;
-	parser = riki.matchiSimpleString(riki.expectMessage("Expect case-insensitive string 'abc'"), "abc");
+	parser = riki.matchiSimpleString("abc");
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("aBc", grammar );
 	
@@ -240,12 +255,17 @@
 Процедура check_neg_istring() Экспорт
 	
 	grammar = new Structure;
-	parser = riki.matchiSimpleString(riki.expectMessage("Expect case-insensitive string 'abc'"), "abc");
+	parser = riki.matchiSimpleString("abc");
 	grammar = riki.Grammar(grammar,"start",parser);
 	result = riki.parse("CbA", grammar );
 	
 	
-	Ожидаем.Что(result.message.message).Равно("Expect case-insensitive string 'abc'");
+	if CurrentLanguage() = Metadata.Languages.Русский then
+		Ожидаем.Что(result.message.message).Равно("Ожидается регистронезависимая строка ""abc""");
+	else
+		Ожидаем.Что(result.message.message).Равно("Expect case-insensitive string ""abc""");
+	endif;
+
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -255,12 +275,11 @@
 КонецПроцедуры
 #endregion
 
-
 #region test_seq
 
 Процедура check_pos_seq() Экспорт
 	grammar = new Structure;
-	parser = riki.matchSeq(riki.expectMessage("seq Expect char from range [a-z]"), riki.matchRange(riki.expectMessage("Expect char from range [a-z]"), "a","z"), riki.matchRange(riki.expectMessage("Expect char from range [0-9]"), "0","9"));
+	parser = riki.matchSeq(riki.matchRange("a","z"), riki.matchRange("0","9"));
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("a1", grammar );
 	
@@ -276,12 +295,16 @@
 
 Процедура check_neg_seq() Экспорт
 	grammar = new Structure;
-	parser = riki.matchSeq(riki.expectMessage("seq Expect char from range [a-z]"), riki.matchRange(riki.expectMessage("Expect char from range [a-z]"), "a","z"), riki.matchRange(riki.expectMessage("Expect char from range [0-9]"), "0","9"));
+	parser = riki.matchSeq(riki.matchRange("a","z"), riki.matchRange("0","9"));
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("1z", grammar );
 	
+	if CurrentLanguage() = Metadata.Languages.Русский then
+		Ожидаем.Что(result.message.message).Равно("Ожидается символ из интервала [a-z]");
+	else
+		Ожидаем.Что(result.message.message).Равно("Expect char from range [a-z]");
+	endif;
 	
-	Ожидаем.Что(result.message.message).Равно("Expect char from range [a-z]");
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -318,12 +341,19 @@
 
 Процедура check_neg_alt() Экспорт
 	grammar = new Structure;
-	parser = riki.matchAlt(riki.matchRange("a","z"), riki.matchRange("0","9"));
+	parser = riki.matchAlt(
+				riki.matchRange("a","z"), 
+				riki.matchRange("0","9"));
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("A", grammar );
 	
 	
-	Ожидаем.Что(result.message.message).Равно("Expect char from range [a-z] or Expect char from range [0-9]");
+	if CurrentLanguage() = Metadata.Languages.Русский then
+		Ожидаем.Что(result.message.message).Равно("Ожидается символ из интервала [a-z] or Ожидается символ из интервала [0-9]");
+	else
+		Ожидаем.Что(result.message.message).Равно("Expect char from range [a-z] or Expect char from range [0-9]");
+	endif;
+	
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -334,12 +364,11 @@
 
 #endregion
 
-
 #region test_not
 
 Процедура check_pos_not() Экспорт
 	grammar = new Structure;
-	parser = riki.matchNot(riki.matchRange("a","z"));
+	parser = riki.matchNot(riki.matchRange( "a","z"));
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("1", grammar );
 	
@@ -354,12 +383,12 @@
 
 Процедура check_neg_not() Экспорт
 	grammar = new Structure;
-	parser = riki.matchNot(riki.matchRange("a","z"));
+	parser = riki.matchNot(riki.matchRange( "a","z"));
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("a", grammar );
 	
+	Ожидаем.Что(result.message.message).Равно("Expect not char from range [a-z]");
 	
-	Ожидаем.Что(result.message.message).Равно("Expect not 'Expect char from range [a-z]'");
 	Ожидаем.Что(result.position.position).Равно(2);
 	Ожидаем.Что(result.position.column).Равно(2);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -369,7 +398,6 @@
 КонецПроцедуры
 
 #endregion
-
 
 #region test_any
 
@@ -394,8 +422,12 @@
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("", grammar );
 	
+	if CurrentLanguage() = Metadata.Languages.Русский then
+		Ожидаем.Что(result.message.message).Равно("Ожидется входной символ");
+	else
+		Ожидаем.Что(result.message.message).Равно("Expect any char");
+	endif;
 	
-	Ожидаем.Что(result.message.message).Равно("Expect any char");
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -410,7 +442,7 @@
 
 Процедура check_pos_eof() Экспорт
 	grammar = new Structure;
-	parser = riki.matchEof();
+	parser = riki.matchEOF();
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("", grammar );
 	
@@ -429,8 +461,12 @@
 	grammar = riki.Grammar(grammar, "start",parser);
 	result = riki.parse("1", grammar );
 	
+	if CurrentLanguage() = Metadata.Languages.Русский then
+		Ожидаем.Что(result.message.message).Равно("Ожидается конец потока");
+	else
+		Ожидаем.Что(result.message.message).Равно("Expect EOF");
+	endif;
 	
-	Ожидаем.Что(result.message.message).Равно("Expect EOF");
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -440,7 +476,6 @@
 КонецПроцедуры
 
 #endregion
-
 
 #region test_star
 
@@ -479,12 +514,11 @@
 
 #endregion
 
-
 #region test_quest
 
 Процедура check_pos_quest() Экспорт
 	grammar = new Structure;
-	parser = riki.matchQuest(riki.matchChar("a"));
+	parser = riki.matchQuest(riki.matchChar("a"), undefined);
 	grammar = riki.Grammar(grammar, "start",parser);
 
 	result = riki.parse("a", grammar );
@@ -500,12 +534,12 @@
 
 Процедура check_neg_quest() Экспорт
 	grammar = new Structure;
-	parser = riki.matchQuest(riki.matchChar("a"));
+	parser = riki.matchQuest(riki.matchChar("a"), "figasik");
 	grammar = riki.Grammar(grammar, "start",parser);
 
 	result = riki.parse("1", grammar );
 	
-	Ожидаем.Что(result.value,"Корректно прочли символ").Равно(undefined);
+	Ожидаем.Что(result.value,"Корректно прочли символ").Равно("figasik");
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -515,8 +549,6 @@
 КонецПроцедуры
 
 #endregion
-
-
 
 #region test_plus
 
@@ -544,7 +576,7 @@
 
 	result = riki.parse("1", grammar );
 	
-	Ожидаем.Что(result.message.message).Равно("Expect seq [1..-1] of 'Expect char 'a''");
+	Ожидаем.Что(result.message.message).Равно("Expect not empty seq of char [a]");
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -554,7 +586,6 @@
 КонецПроцедуры
 
 #endregion
-
 
 #region test_lookahead
 
@@ -581,7 +612,7 @@
 
 	result = riki.parse("1a", grammar );
 	
-	Ожидаем.Что(result.message.message).Равно("Expect char 'a'");
+	Ожидаем.Что(result.message.message).Равно("Expect char [a]");
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
@@ -591,7 +622,6 @@
 КонецПроцедуры
 
 #endregion
-
 
 #region test_plus
 
@@ -629,6 +659,12 @@
 
 	result = riki.parse("1", grammar );
 	
+	if CurrentLanguage() = Metadata.Languages.Русский then
+		Ожидаем.Что(result.message.message).Равно("Ожидается символ [a]");
+	else
+		Ожидаем.Что(result.message.message).Равно("Expect char [a]");
+	endif;
+
 	Ожидаем.Что(result.position.position).Равно(1);
 	Ожидаем.Что(result.position.column).Равно(1);
 	Ожидаем.Что(result.position.line).Равно(1);
